@@ -1,0 +1,5 @@
+1.com.nb.robot.serialComm 
+java.lang.UnsatisfiedLinkError: no rxtxSerial in java.library.path thrown while loading gnu.io.RXTXCommDriver
+
+2.com.nb.robot.xf
+Exception in thread "main" java.lang.UnsatisfiedLinkError: /home/mj/workspace/BankRobot/src/libasr_native.so: libmsc.so: 无法打开共享对象文件: 没有那个文件或目录
