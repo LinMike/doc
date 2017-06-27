@@ -1,0 +1,58 @@
+xml/yaml presistence
+
+FileStorage fs("test.yml",FileStorage::Write)
+
+fs<<"frameCount"<<5;    (name->value)
+fs.release();
+
+
+
+Mat
+rows
+cols
+dt datatype
+data
+
+
+FileStorage fs("test.yml",FileStorage::Read)
+fs[name]>>obj
+
+
+
+vcla 
+add storage path
+cameraMatrix distCoeffs
+imageSize
+RMS 精度
+
+guvcview
+v4l-utils
+
+
+extrinsic Matrix
+
+namedWindow()//设置window
+setMouseCallback(winname,mouseCallbsck,0)//实现鼠标点击回调,获取点击的x,y
+ 参数 1.图片路径 2.输出图片中点的文本文件路径
+ load image -> 
+
+获取亚像素级的x,y
+先放大4倍，然后 x= x * 1.0/4;
+resize(input image,output image,Size outputSize) outputSize是原来大小的4倍
+
+
+第二个程序
+
+bool solvePnp(objPoints,imagePoints,cameraMatrix,distCoeffs,Mat rves,Mat tvec); distCoeffs空的Mat，tvec就是T ，用Rodrigues()获取 R
+return false 选点可能有问题
+
+函数中不变的参数最好用const修饰，全局的变量最好用static修饰，函数多而短，不要全而长。
+减少hard code，常量使用宏定义或const int，而不直接写数值
+
+
+
+
+doUndist是否使用畸变系数
+
+
+

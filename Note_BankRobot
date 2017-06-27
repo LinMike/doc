@@ -1,0 +1,7 @@
+1.Opencv报“HIGHGUI ERROR: V4L/V4L2: VIDIOC_S_CROP”错误处理方法 
+错误的原因可能是因为没有安装V4L库
+解决方法：sudo apt-get install libv4l-dev
+
+需要重现编译安装opencv
+编译命令需要加上 -DWITH_V4L=ON
+然后sudo make -j8 && make install
