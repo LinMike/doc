@@ -1,0 +1,7 @@
+在编译安装opencv后，需要继续安装opencv-java
+1.sudo apt-get install ant
+2.cmake -DBUILD_SHARED_LIBS=ON ..
+在输出中如果有 To be built ... java ...就可以了
+3.make -j8
+4.sudo make install
+5.在执行完成后在build/bin目录下会生成jar包
