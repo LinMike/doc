@@ -1,0 +1,171 @@
+RXTX是一个提供串口和并口通信的开源java类库。
+rxtx API的核心是<抽象>的Commport类（用于描述一个被底层系统支持的端口的抽象类，它包含一些高层的IO控制方法，这些方法对于所有不同的通讯端口来说是通用的)及其两个子类：SerialPort类和ParallePort类。
+SerialPort类是用于串口通信的类，ParallePort是用于并口通信的类。
+Commport提供getInputStream()和getOutputStream()方法用于与端口上的设备通信。
+
+接口
+CommDriver可负载设备驱动程序接口的一部分。
+CommPortOwnershipListener传递各种通讯端口的所有权事件
+ParallelPortEventListener传递并行端口事件
+SerialPortEventListener传递串行端口事件
+
+类
+CommPort通讯端口
+CommPortIdentifier通讯端口管理
+ParallelPort并行通讯端口
+ParallelPortEvent并行端口事件
+SerialPortRS-232串行通讯端口
+SerialPortEvent 串行端口事件
+异常类
+
+NoSuchPortException当驱动程序不能找到指定端口时抛出
+
+PortInUseException当碰到指定端口正在使用中时抛出
+
+UnsupportedCommOperationException驱动程序不允许指定操作时抛出
+CommPortIdentifier类
+
+这个类主要用于对通信端口进行管理和设置，是对端口进行访问控制的核心类，主要包括以下方法：
+
+addPortName(String,int, CommDriver) 添加端口名到端口列表里
+
+addPortOwnershipListener(CommPortOwnershipListener)添加端口拥有的监听器
+
+removePortOwnershipListener(CommPortOwnershipListener)移除端口拥有的监听器
+
+getCurrentOwner()获取当前占有端口的对象或应用程序
+
+getName()获取端口名称
+
+getPortIdentifier(CommPort)获取指定打开的端口的CommPortIdentifier类型对象
+
+getPortIdentifier(String)获取以参数命名的端口的CommPortIdentifier类型对象
+
+getPortIdentifiers()获取系统中的端口列表
+
+getPortType()获取端口的类型
+
+isCurrentlyOwned()判断当前端口是否被占用
+
+open(FileDescriptor)用文件描述的类型打开端口
+
+open(String,int) 打开端口，两个参数：程序名称，延迟时间(毫秒数)
+SerialPort类
+
+这个类用于描述一个RS-232串行通信端口的底层接口，它定义了串口通信所需的最小功能集。通过它，用户可以直接对串口进行读、写及设置工作。
+
+SerialPort类中关于串口参数的静态成员变量说明:
+
+DATABITS_5 数据位为5
+
+DATABITS_6 数据位为6
+
+DATABITS_7 数据位为7
+
+DATABITS_8 数据位为8
+
+PARITY_NONE 空格检验
+
+PARITY_ODD 奇检验
+
+PARITY_EVEN 偶检验
+
+PARITY_MARK 标记检验
+
+PARITY_SPACE 无检验
+
+STOPBITS_1 停止位为1
+
+STOPBITS_2 停止位为2
+
+STOPBITS_1_5 停止位为1.5
+
+
+SerialPort类中关于串口参数的方法说明:
+
+getBaudRate()得到波特率
+
+getParity()得到检验类型
+
+getDataBits()得到数据位数
+
+getStopBits()得到停止位数
+
+setSerialPortParams(int,int, int, int) 设置串口参数依次为(波特率,数据位,停止位,奇偶检验)
+
+SerialPort类中关于事件的静态成员变量说明：
+
+BI Break interrupt 通讯中断
+
+FE Framing error 帧错误
+
+CD Carrier detect 载波侦听
+
+OE Overrun error 溢位错误
+
+CTS Clear to send 清除发送
+
+PE Parity error 奇偶检验错误
+
+DSR Data set ready 数据设备准备好
+
+RI Ring indicator 响铃侦测
+
+DATA_AVAILABLE 串口中的可用数据
+
+OUTPUT_BUFFER_EMPTY 输出缓冲区已清空
+
+ 
+
+SerialPort类中关于事件的方法说明：
+
+isCD()是否有载波
+
+isCTS()是否清除以传送
+
+isDSR()数据是否备妥
+
+isDTR()是否数据端备妥
+
+isRI()是否响铃侦测
+
+isRTS()是否要求传送
+
+addEventListener(SerialPortEventListener)向SerialPort对象中添加串口事件监听器
+
+removeEventListener()移除SerialPort对象中的串口事件监听器
+
+notifyOnBreakInterrupt(boolean)设置中断事件true有效,false无效
+
+notifyOnCarrierDetect(boolean)设置载波监听事件true有效,false无效
+
+notifyOnCTS(boolean)设置清除发送事件true有效,false无效
+
+notifyOnDataAvailable(boolean)设置串口有数据的事件true有效,false无效
+
+notifyOnDSR(boolean)设置数据备妥事件true有效,false无效
+
+notifyOnFramingError(boolean)设置发生错误事件true有效,false无效
+
+notifyOnOutputEmpty(boolean)设置发送缓冲区为空事件true有效,false无效
+
+notifyOnParityError(boolean)设置发生奇偶检验错误事件true有效,false无效
+
+notifyOnRingIndicator(boolean)设置响铃侦测事件true有效,false无效
+
+getEventType()得到发生的事件类型返回值为int型
+
+sendBreak(int)设置中断过程的时间，参数为毫秒值
+
+setRTS(boolean)设置或清除RTS位
+
+setDTR(boolean)设置或清除DTR位
+
+SerialPort中的其他常用方法说明：
+
+close()关闭串口
+
+getOutputStream()得到OutputStream类型的输出流
+
+getInputStream()得到InputStream类型的输入流
+
