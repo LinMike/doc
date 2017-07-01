@@ -1,4 +1,8 @@
 安装 rxtx library :
+为了使我们的程序使用RXTX作为串口通讯的底层API，需要配置它的环境。仍然以Linux系统平台为例：
+    1.复制librxtxSerial.so，librxtxParallel.so到$JAVA_HOME/lib/$(ARCH)/
+    2.复制RXTXcomm.jar到$JAVA_HOME/ext/,或在应用程序启动的CLASSPATH中包含RXTXcomm.jar
+    3.定义驱动类后将javax.comm.properties放在应用程序的根目录下
 1.
     sudo apt-get install librxtx-java
     sudo cp /usr/lib/jni/librxtxSerial.so /opt/java/jdk1.8.0_05/jre/lib/amd64/
