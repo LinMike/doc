@@ -1,0 +1,50 @@
+     Ubuntu安装和配置Java环境：JDK一般安装有两种方式：一.直接下载jdk压缩包方式安装：这种安装可自由选择JDK版本，能进行灵活的配置。
+    1.下载相应版本的JDK环境。http://www.oracle.com/technetwork/java/javase/downloads/index.html 2.将jdk移动到/opt目录下，并安装
+
+    sudo cp /home/yourname/Doenloads/jdk-8u121-linux-x64.tar.gz /opt
+
+    cd /opt
+
+    sudo tar -zxvf jdk-8u121-linux-x64.tar.gz
+
+    3.设置环境变量，在/etc/profile中添加JDK配置信息：
+
+    sudo gedit /etc/profile
+
+    在最后添加如下内容：
+
+    # set jdk environment
+
+    export JAVA_HOME=/opt/jdk
+
+    export JRE_HOME=${JAVA_HOME}/jre
+
+    export CLASSPATH=.:${JAVA_HOME}/lib:${JRE_HOME}/lib
+
+    export PATH=${JAVA_HOME}/bin:$PATH
+
+    source /etc/profile (让刚刚的配置生效)
+
+    4.检测
+
+    在终端输入
+
+    java -version
+
+    显示
+
+    java version "1.8.0_121"
+
+    Java(TM) SE Runtime Environment (build 1.8.0_121-b13)
+
+    Java HotSpot(TM) 64-Bit Server VM (build 25.121-b13, mixed mode)
+
+    5.设置系统默认JDK版本
+
+    sudo update-alternatives --install /usr/bin/java java /opt/jdk/bin/java 50
+
+    sudo update-alternatives --install /usr/bin/javac javac /opt/jdk/bin/javac 50
+
+    sudo update-alternatives --config java
+
+
