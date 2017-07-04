@@ -7,6 +7,7 @@
     sudo apt-get install librxtx-java
     sudo cp /usr/lib/jni/librxtxSerial.so /opt/java/jdk1.8.0_05/jre/lib/amd64/
     sudo cp /usr/lib/jni/librxtxParallel.so /opt/java/jdk1.8.0_05/jre/lib/amd64/
+    copy RXTXComm.jar to /opt/java/jdk1.8.0_05/jre/lib/ext
     add /usr/share/java/RXTXcomm.jar to project Java build path
 
 2.提供串口操作权限
