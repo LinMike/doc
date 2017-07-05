@@ -12,7 +12,6 @@
 
 2.提供串口操作权限
     sudo chmod o+rw /dev/ttyS*
-    sudo chmod 666 /dev/ttyUSB0
 
 Quota from INSTALL file of rxtx download package:
 A person is added to group lock or uucp by editing /etc/groups. Distributions have various tools but this works: `lock:x:54:` becomes: `lock:x:53:jarvi,taj`. Now jarvi and taj are in group lock. Also make sure jarvi and taj have read and write permissions on the port.
