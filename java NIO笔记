@@ -1,0 +1,41 @@
+NIO参考资料 
+
+3.Buffer
+capacity 指示一个缓冲区的大小
+
+当你写数据到Buffer中时，position表示当前的位置。
+当将Buffer从写模式切换到读模式，position会被重置为0
+
+在写模式下，limit 表示能写入的数据数量，limit=capatity
+在读模式下，limit 表示最多能读取到多少数据
+因此写模式切换到读模式后limit设置为写模式的position
+
+rewind()方法
+将position设回0，可以重读buffer的数据。limit保持不变
+
+clear()和compact()
+如果调用的是clear()方法，position将被设回0，limit被设置成 capacity的值。换句话说，Buffer 被清空了。Buffer中的数据并未清除，只是这些标记告诉我们可以从哪里开始往Buffer里写数据。
+
+compact()方法将所有未读的数据拷贝到Buffer起始处。然后将position设到最后一个未读元素正后面。limit属性依然像clear()方法一样，设置成capacity。现在Buffer准备好写数据了，但是不会覆盖未读的数据。
+
+mark()和reset()
+mark标记buffer中一个特定的position，通过reset方法恢复到这个position。
+
+equals()和compareTo()方法
+
+equals()当满足下列条件时，表示两个Buffer相等：
+
+    有相同的类型（byte、char、int等）。
+    Buffer中剩余的byte、char等的个数相等。
+    Buffer中所有剩余的byte、char等都相同。
+
+compareTo()方法比较两个Buffer的剩余元素(byte、char等)， 如果满足下列条件，则认为一个Buffer“小于”另一个Buffer：
+
+    第一个不相等的元素小于另一个Buffer中对应的元素 。
+    所有元素都相等，但第一个Buffer比另一个先耗尽(第一个Buffer的元素个数比另一个少)。
+
+译注：剩余元素是从 position到limit之间的元素
+
+
+Selector
+
