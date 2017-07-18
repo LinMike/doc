@@ -1,0 +1,18 @@
+jni设置java.library.path
+Linux环境
+设置LD_LIBRARY_PATH来添加java.library.path
+window环境
+设置path环境变量
+eclipse
+run settting -> arguments -> vm arguments
+-Djava.library.path=~/wordspace/
+
+intellij idea
+ vm options ...
+
+程序中添加
+System.setProperty("java.library.path",System.getProperty("java.library.path")+":/home/user/wordspace");
+Field field=ClassLoader.class.getDeclaredField("sys_paths");
+field.setAccessible(true);
+field.set(null,null);
+System.loadLibrary("JNILib");
