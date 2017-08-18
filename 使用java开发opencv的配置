@@ -5,3 +5,6 @@
 3.make -j8
 4.sudo make install
 5.在执行完成后在build/bin目录下会生成jar包
+
+问题一：编译时找不到jni路径？
+jdk文件如果没有安装在/usr/lib/jvm/路径下，opencv无法在shared library中找到jni的路径(java_home/include)，以此需要在/usr/lib/jvm/下创建jdk的链接(sudo ln -s 源文件 链接links)，然后export JAVA_HOME=/usr/lib/jvm/jdk
