@@ -1,0 +1,8 @@
+1.	sudo apt-get install gcc-arm-linux-gnueabi  -- must
+	[sudo apt-get install qemu-system-arm qemu-system-x86]
+2.	sudo apt-get install ccache  -- must
+
+[	ln -s $(which ccache) arm-linux-gnueabihf-gcc
+	ln -s $(which ccache) arm-linux-gnueabihf-g++
+	ln -s $(which ccache) arm-linux-gnueabihf-cpp
+	ln -s $(which ccache) arm-linux-gnueabihf-c++ ]	
