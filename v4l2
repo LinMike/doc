@@ -1,0 +1,46 @@
+1. ioctl(int fd,int cmd,void* arg)
+	fd - 打开的文件描述符
+	cmd - 用户程序对设备的控制命令
+	arg - 额外参数，根据cmd类型不同
+ ioctl是设备驱动程序中对设备的I/O通道进行管理的函数。所谓对I/O通道进行管理，就是对设备的一些特性进行控制，例如串口的传输波特率、马达的转速等等。
+
+cmd：
+	VIDIOC_QUERYCAP     /* 获取设备支持的操作 */  
+	VIDIOC_G_FMT        /* 获取设置支持的视频格式 */  
+	VIDIOC_S_FMT        /* 设置捕获视频的格式 */  
+	VIDIOC_REQBUFS      /* 向驱动提出申请内存的请求 */  
+	VIDIOC_QUERYBUF     /* 向驱动查询申请到的内存 */  
+	VIDIOC_QBUF         /* 将空闲的内存加入可捕获视频的队列 */  
+	VIDIOC_DQBUF        /* 将已经捕获好视频的内存拉出已捕获视频的队列 */  
+	VIDIOC_STREAMON     /* 打开视频流 */  
+	VIDIOC_STREAMOFF    /* 关闭视频流 */  
+	VIDIOC_QUERYCTRL    /* 查询驱动是否支持该命令 */  
+	VIDIOC_G_CTRL       /* 获取当前命令值 */  
+	VIDIOC_S_CTRL       /* 设置新的命令值 */  
+	VIDIOC_G_TUNER      /* 获取调谐器信息 */  
+	VIDIOC_S_TUNER      /* 设置调谐器信息 */  
+	VIDIOC_G_FREQUENCY  /* 获取调谐器频率 */  
+	VIDIOC_S_FREQUENCY  /* 设置调谐器频率 */
+      
+VIDIOC_QUERYCAP 命令通过结构 v4l2_capability 获取设备支持的操作模式
+struct v4l2_capability {  
+	__u8    driver[16];     /* i.e. "bttv" */  
+	__u8    card[32];       /* i.e. "Hauppauge WinTV" */  
+	__u8    bus_info[32];   /* "PCI:" + pci_name(pci_dev) */  
+	__u32   version;        /* should use KERNEL_VERSION() */  
+	__u32   capabilities;   /* Device capabilities */  
+	__u32   reserved[4];  
+};
+其中域 capabilities 代表设备支持的操作模式，常见的值有 V4L2_CAP_VIDEO_CAPTURE | V4L2_CAP_STREAMING 表示是一个视频捕捉设备并且具有数据流控制模式；另外 driver 域需要和 struct video_device 中的 name 匹配。
+struct v4l2_capability cap;
+ioctl(g_fd, VIDIOC_QUERYCAP, &cap)
+
+2. v4l2 input 和 output 的方式
+Read/Write
+	如果输入和输出设备支持read/write操作，那么VIDIOC_QUERYCAP ioctl返回的v4l2_capability结构的capabilities成员要包含V4L2_CAP_READWRITE标志。和stream I/O模式相比，read/write需要CPU拷贝数据，（当然stream I/O的user pointers也需要数据拷贝，如果user pointers不是连续的物理页面，而驱动的DMA又需要大块连续物理页面）。此外和stream-io模式相比，read/write无法获取meta-information而被看作是较低级的I/O操作，比如帧计数和时间戳等，这些meta-information是识别掉帧以及和其他数据流同步的必要数据。当然Read/Write是最简单的I/O方式，所以编码更简单。
+
+Streaming I/O (Memory Mapping)
+	如果输入和输出设备支持Stream I/O操作，那么VIDIOC_QUERYCAP ioctl返回v4l2_capability结构的capabilities成员要包含V4L2_CAP_STREAMING标志。Streaming I/O方式仅仅buffers的指针在application和driver间交换，数据本身不会做copy。memory mapping主要是把设备中的物理内存映射为应用的地址空间。设备的物理内存可以是图形卡的video内存，也可以是主存中的DMA内存。
+
+Streaming I/O (User Pointers)
+	这种I/O结合了read/write和memory mapping的优点，application分配Buffers（包括planes），buffers是虚拟内存或者共享内存。驱动和应用间通过数据指针交换数据，这些指针和meta-information通过结构v4l2_buffer传递。

@@ -1,4 +1,5 @@
-NFSPATH=/home/yuanf/nfs
+#NFSPATH=/home/yuanf/nfs
+NFSPATH=/home/robot/arm_nfs
 #CC=arm-none-linux-gnueabi-gcc
 CC=arm-linux-gnueabi-gcc
 #CC=gcc

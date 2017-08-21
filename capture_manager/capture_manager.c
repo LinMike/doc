@@ -328,7 +328,7 @@ int capmgr_mainloop()
             }
             else
             {
-                if (g_input_device->read_frame(&g_input_buffer.buf, &g_input_buffer.size))
+                if (g_input_device->read_frame(&g_input_buffer.buf, &g_input_buffer.size))//ä»å†…å­˜è¯»å–ä¸€å¸§æ•°æ®
                 {
                     if (process_frame(g_input_buffer.buf, g_input_buffer.size) < 0)
                     {
@@ -570,12 +570,12 @@ int capmgr_open(capmgr_config_t* config)
     }
     g_input_param.framerate = g_capmgr_config.fr_input;
 
-    g_input_fd = g_input_device->open(&g_input_param);
+    g_input_fd = g_input_device->open(&g_input_param);//g_input_device -> fileã€fpgaã€mock_contour8
     if (g_input_fd < 0) {
         log_error("failed to open input device!\n");
         goto ret_close;
     }
-
+    //è®¾ç½®è¾“å‡ºè®¾å¤‡å‚æ•°ï¼Œè¾“å‡ºåˆ°æ˜¾ç¤ºå™¨hdmiï¼Œfile yuvå›¾ç‰‡æ–‡ä»¶ç­‰
     g_output_buffer.width = ORIGIN_FRAME_WIDTH;
     g_output_buffer.height = ORIGIN_FRAME_HEIGHT;
 
@@ -601,7 +601,7 @@ int capmgr_open(capmgr_config_t* config)
     }
 
     //A general frame buffer for frame skipping
-    g_bufsize = OUT_FRAME_SIZE;
+    g_bufsize = OUT_FRAME_SIZE;//ä¸€å¸§å›¾ç‰‡åŒ…å«å·¦å³å›¾ç‰‡çš„Yå’Œuvæ•°æ®
     g_buf = (uint8_t*)malloc(g_bufsize);
     if (g_buf == NULL) {
         log_error("malloc g_buf failed!\n");
@@ -634,11 +634,11 @@ int capmgr_open(capmgr_config_t* config)
         goto ret_close;
     }
 
-    ret = g_input_device->start();
+    ret = g_input_device->start();//è®¾å¤‡å¼€å¯è§†é¢‘æ•æ‰å¹¶æŠŠæ•°æ®å†™å…¥ç¼“å†²å¸§
     if (ret < 0) goto ret_close;
 
     if (g_capmgr_config.enable_preview) {
-        ret = g_output_device->start();
+        ret = g_output_device->start();//å¼€å¯è§†é¢‘è¾“å‡ºè®¾å¤‡
         if (ret < 0) goto ret_close;
     }
 
@@ -677,9 +677,9 @@ int capmgr_enable_preview()
     return 0;
 }
 
-//Ä¿Ç°ÓĞÒ»¸öÒÑÖªµÄÎÊÌâ, ARM°å×Ó¿ª»úºóÃ»·¨Ö±½ÓÓÃFrameBufferÏÔÊ¾£¬ĞèÒªÌáÇ°ÔËĞĞÒ»¸öhdmi²âÊÔ³ÌĞò²ÅĞĞ¡£
-//Ä¿Ç°»¹Ã»ÓĞÕÒµ½×îÖÕµÄÔ­Òò£¬µ«ÊÇ²âÊÔºóÏÂÃæµÄ·½°¸¿ÉÒÔÁÙÊ±ĞÔµÄ½â¾öÕâ¸öÎÊÌâ¡£
-//ÒÔÏÂµÄWorkaroundÊÇÁÙÊ±ÒÔv4l2µÄ·½Ê½´ò¿ªÒ»ÏÂHDMIÉè±¸£¬Ëæ±ãĞ´Ò»µãÊı¾İ£¬È»ºó¹Ø±ÕÉè±¸
+//ç›®å‰æœ‰ä¸€ä¸ªå·²çŸ¥çš„é—®é¢˜, ARMæ¿å­å¼€æœºåæ²¡æ³•ç›´æ¥ç”¨FrameBufferæ˜¾ç¤ºï¼Œéœ€è¦æå‰è¿è¡Œä¸€ä¸ªhdmiæµ‹è¯•ç¨‹åºæ‰è¡Œã€‚
+//ç›®å‰è¿˜æ²¡æœ‰æ‰¾åˆ°æœ€ç»ˆçš„åŸå› ï¼Œä½†æ˜¯æµ‹è¯•åä¸‹é¢çš„æ–¹æ¡ˆå¯ä»¥ä¸´æ—¶æ€§çš„è§£å†³è¿™ä¸ªé—®é¢˜ã€‚
+//ä»¥ä¸‹çš„Workaroundæ˜¯ä¸´æ—¶ä»¥v4l2çš„æ–¹å¼æ‰“å¼€ä¸€ä¸‹HDMIè®¾å¤‡ï¼Œéšä¾¿å†™ä¸€ç‚¹æ•°æ®ï¼Œç„¶åå…³é—­è®¾å¤‡
 void workaround()
 {
     uint8_t data;
