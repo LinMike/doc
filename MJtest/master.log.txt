@@ -1,0 +1,22 @@
+io_service starts to run
+[31m31922: ../motion/robotmotion.cpp 140: Joystick /dev/input/js0 open failure!
+[0m[31m31922: ../motion/serial.cpp 92: error 2 opening /dev/ttyUSB0
+[0m[31m31922: ../motion/robotmotion.cpp 154: Serial /dev/ttyUSB0 open failure!
+[0m[33m36930: ../net/RecvServer.cpp 23: CONNECTED: 127.0.0.1
+[0m[37m37022: ../net/RecvServer.cpp 71: Send: 32 bytes: 3:1504593037022:20170905_143030
+[0m[990.535, 236.957, 103.155]
+[36m37183: quadFetchRoutine.cpp 29: Receive 1 balls at 1504593037180 from Slave 0
+[0m[31m37183: quadTrack.cpp 147: oldTracks number = 0
+[0m[31m37183: quadTrack.cpp 262: # Tracks = 1
+[0m[33m37183: quadTrack.cpp 116: master quadTrackThread time span = 0.085102 ms
+[0m[972.727, 232.352, 103.867]
+[997.654, 275.42, 90.0628]
+[36m37183: quadFetchRoutine.cpp 29: Receive 2 balls at 1504593037183 from Slave 0
+[0m[31m37183: quadTrack.cpp 147: oldTracks number = 1
+[0m[32m37183: quadTrack.cpp 166: the predPos is = [0, 0, 0]
+[0m[31m37183: quadTrack.cpp 262: # Tracks = 2
+[0m[33m37183: quadTrack.cpp 116: master quadTrackThread time span = 0.113218 ms
+[0m[981.072, 268.039, 91.1019]
+[36m37183: quadFetchRoutine.cpp 29: Receive 1 balls at 1504593037183 from Slave 0
+[0m[31m37183: quadTrack.cpp 147: oldTracks number = 2
+[0m
