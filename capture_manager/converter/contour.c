@@ -28,6 +28,9 @@
 #define CONTOUR_SUCCESS     (0)
 #define CONTOUR_END         DEF_CONTOUR_STATE(1)
 
+#define FRAME_SEQ_NUMBER_OFFSET (3)
+#define EXTRACT_FRAME_SEQ_NUMBER(data) (((data) & 0xFE) >> 1)
+
 //The boundary box for a contour, after geting the boundary box of a contour, we can save
 //a lot time to scan the contour block and thus quicky calculate the centroid
 typedef struct {
@@ -395,15 +398,13 @@ static int parse_one_camera(const uint8_t* const data, const int size, camera_co
     cfc->num_of_contours = 0;
     cfc->err = 0;
     contour = &cfc->contours[0];
-    //The sequence number is always stored at the last row's 4th byte (7 bit MSB),
-    //so it can be extracted in advance
-    cfc->seq_number = ((data[CONTOUR_FRAME_SIZE - CONTOUR_FRAME_WIDTH + 3] & 0xFE) >> 1);
     for ( i = 0; i < size; i += CONTOUR_FRAME_WIDTH)
     {
         contour_data = data + i;
         ret = parse_contour_points(contour_data, contour);
         if (ret == CONTOUR_END)
         {
+            cfc->seq_number = EXTRACT_FRAME_SEQ_NUMBER(contour_data[FRAME_SEQ_NUMBER_OFFSET]);
             break;
         }
         else if (HAS_CONTOUR_ERROR(ret))
@@ -446,9 +447,9 @@ static int parse_all_cameras(const uint8_t* const data, frame_contours_t* fc, in
 {
     int i, c, ret;
     int data_offset = 0;
+    int cur_seq_num;
 #if ENABLE_DETAIL_PRINT
     static int next_seq_num = MAX_CONTOUR_SEQ_NUMBER + 1;
-    int cur_seq_num;
 #endif
 
     //initialize as error, if eventually the contour is valid, this error will be cleared.
@@ -462,16 +463,21 @@ static int parse_all_cameras(const uint8_t* const data, frame_contours_t* fc, in
         if (HAS_CONTOUR_ERROR(ret))
             return ret;
         data_offset += CONTOUR_FRAME_SIZE;
+    }
+
+    //Only the last camera the valid seq_number, so need to update all carames' seq_number using the last one
+    cur_seq_num = fc->cameras[MAX_CAMERA_NUM-1].seq_number;
+    for (i = 0; i < MAX_CAMERA_NUM-1; i++)
+    {
+        fc->cameras[i].seq_number = cur_seq_num;
+    }
 
 #if ENABLE_DETAIL_PRINT
         //Check the seqnumber
-        cur_seq_num = fc->cameras[i].seq_number;
         if (cur_seq_num != next_seq_num && next_seq_num <= MAX_CONTOUR_SEQ_NUMBER)
             log_warn("Detect sequence number (curr=%d, expected=%d) is not continuous, there may be frames dropped by driver\n", cur_seq_num, next_seq_num);
         next_seq_num = calc_next_seq_num(cur_seq_num);
 #endif
-    }
-
     return CONTOUR_SUCCESS;
 }
 
