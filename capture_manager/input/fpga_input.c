@@ -112,7 +112,7 @@ static int fpga_read_frame(unsigned char** frame_buf, int* frame_size)
             buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
             buf.memory = V4L2_MEMORY_MMAP;
 
-            if (-1 == xioctl(g_fd, VIDIOC_DQBUF, &buf))//从缓冲队列中取出缓冲帧
+            if (-1 == xioctl(g_fd, VIDIOC_DQBUF, &buf))
             {
                 switch (errno)
                 {
@@ -132,12 +132,12 @@ static int fpga_read_frame(unsigned char** frame_buf, int* frame_size)
 
             assert(buf.index < n_buffers);
 
-            *frame_buf = (unsigned char*)buffers[buf.index].start;//获取内存映射中的index帧的数据地址
+            *frame_buf = (unsigned char*)buffers[buf.index].start;
             *frame_size = buf.bytesused;
 
             //process_image(buffers[buf.index].start, buf.bytesused);
 
-            if (-1 == xioctl(g_fd, VIDIOC_QBUF, &buf)) {//将缓存帧放入缓冲队列
+            if (-1 == xioctl(g_fd, VIDIOC_QBUF, &buf)) {
                 errno_dump("VIDIOC_QBUF");
                 return -1;
             }
@@ -210,7 +210,7 @@ static int stop_capturing(void)
             break;
     }
 }
-//开启视频捕捉并把数据写入缓冲帧
+
 static int start_capturing(void)
 {
     unsigned int i;
@@ -241,7 +241,7 @@ static int start_capturing(void)
 
                 //log_debug("\tbuf.index: %d\n", buf.index);
 
-                err == xioctl(g_fd, VIDIOC_QBUF, &buf);//把缓冲帧数据放入缓存队列，视频捕获时将数据写入缓冲帧，DQBUF取出缓冲帧处理图片数据
+                err == xioctl(g_fd, VIDIOC_QBUF, &buf);
                 //log_debug("\terr: %d\n", err);
 
                 if (-1 == err) {
@@ -254,7 +254,7 @@ static int start_capturing(void)
 
             //log_debug("Before STREAMON\n");
             type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-            if (-1 == xioctl(g_fd, VIDIOC_STREAMON, &type)) {//开启视频流
+            if (-1 == xioctl(g_fd, VIDIOC_STREAMON, &type)) {
                 errno_dump("VIDIOC_STREAMON");
                 return -1;
             }
@@ -317,7 +317,7 @@ static int uninit_device(void)
 
     FREE(buffers);
 }
-//申请图片数据的缓冲区
+
 static int init_read(unsigned int buffer_size)
 {
     log_debug("%s: called!\n", __func__);
@@ -341,7 +341,7 @@ static int init_read(unsigned int buffer_size)
     }
     return 0;
 }
-//向设备申请一个拥有四个缓冲帧的缓冲区
+
 static int init_mmap(void)
 {
     struct v4l2_requestbuffers req;
@@ -350,11 +350,11 @@ static int init_mmap(void)
 
     CLEAR(req);
 
-    req.count = 4;// 缓冲区内缓冲帧的数目
-    req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;// 缓冲帧数据格式
-    req.memory = V4L2_MEMORY_MMAP;// 区别是内存映射还是用户指针方式
+    req.count = 4;
+    req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    req.memory = V4L2_MEMORY_MMAP;
 
-    if (-1 == xioctl(g_fd, VIDIOC_REQBUFS, &req))//申请一个拥有四个缓冲帧的缓冲区
+    if (-1 == xioctl(g_fd, VIDIOC_REQBUFS, &req))
     {
         if (EINVAL == errno)
         {
@@ -388,7 +388,7 @@ static int init_mmap(void)
         log_error( "Out of memory\n");
         return -1;
     }
-    //获取每一个缓冲帧的起始地址和长度
+
     for (n_buffers = 0; n_buffers < req.count; ++n_buffers)
     {
         struct v4l2_buffer buf;
@@ -399,7 +399,7 @@ static int init_mmap(void)
         buf.memory = V4L2_MEMORY_MMAP;
         buf.index = n_buffers;
 
-        if (-1 == xioctl(g_fd, VIDIOC_QUERYBUF, &buf)) {//获取缓冲帧的地址，长度
+        if (-1 == xioctl(g_fd, VIDIOC_QUERYBUF, &buf)) {
             errno_dump("VIDIOC_QUERYBUF");
             return -1;
         }
@@ -428,7 +428,7 @@ static int init_mmap(void)
         */
         buffers[n_buffers].length = buf.length;
         buffers[n_buffers].start = mmap(NULL /* start anywhere */, buf.length,
-            PROT_READ | PROT_WRITE /* required */, MAP_SHARED /* recommended */, g_fd, buf.m.offset);//缓冲区映射到内存
+            PROT_READ | PROT_WRITE /* required */, MAP_SHARED /* recommended */, g_fd, buf.m.offset);
 
         if (MAP_FAILED == buffers[n_buffers].start) {
             errno_dump("mmap");
@@ -485,7 +485,7 @@ static int init_userp(unsigned int buffer_size)
         }
     }
 }
-//初始化设备，设置v4l2格式参数，初始化内存映射
+
 static int init_device(void)
 {
     struct v4l2_capability cap;
@@ -496,7 +496,7 @@ static int init_device(void)
     unsigned int min;
     int input;
 
-    if (-1 == xioctl(g_fd, VIDIOC_QUERYCAP, &cap))//获取设备支持的操作模式
+    if (-1 == xioctl(g_fd, VIDIOC_QUERYCAP, &cap))
     {
         if (EINVAL == errno)
         {
@@ -509,7 +509,7 @@ static int init_device(void)
             return -1;
         }
     }
-    //打印设备驱动信息
+
     log_debug("\tdriver: %s\n"
              "\tcard: %s \n"
              "\tbus_info: %s\n",
@@ -518,7 +518,7 @@ static int init_device(void)
         cap.version & 0xFF);
     log_debug("\tcapabilities: 0x%08x\n", cap.capabilities);
 
-    if (!(cap.capabilities & V4L2_CAP_VIDEO_CAPTURE))//判断是否是一个视频捕捉设备
+    if (!(cap.capabilities & V4L2_CAP_VIDEO_CAPTURE))
     {
         log_error( "%s is no video capture device\n", g_cap_param.dev);
         return -1;
@@ -527,7 +527,7 @@ static int init_device(void)
     switch (io)
     {
         case IO_METHOD_READ:
-            if (!(cap.capabilities & V4L2_CAP_READWRITE))//判断是否支持读写
+            if (!(cap.capabilities & V4L2_CAP_READWRITE))
             {
                 log_error( "%s does not support read i/o\n", g_cap_param.dev);
                 return -1;
@@ -536,7 +536,7 @@ static int init_device(void)
 
         case IO_METHOD_MMAP:
         case IO_METHOD_USERPTR:
-            if (!(cap.capabilities & V4L2_CAP_STREAMING))//判断是否支持地址空间的内存映射
+            if (!(cap.capabilities & V4L2_CAP_STREAMING))
             {
                 log_error( "%s does not support streaming i/o\n", g_cap_param.dev);
                 return -1;
@@ -553,11 +553,11 @@ static int init_device(void)
     }*/
 
     CLEAR(stream_param);
-    stream_param.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;//视频捕捉设备
+    stream_param.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     stream_param.parm.capture.timeperframe.numerator = 1;
-    stream_param.parm.capture.timeperframe.denominator = g_cap_param.framerate;//numerator 和denominator所描述的系数给出的是成功的帧之间的时间间隔
+    stream_param.parm.capture.timeperframe.denominator = g_cap_param.framerate;
     stream_param.parm.capture.capturemode = g_cap_param.camera_mode;
-    if (xioctl(g_fd, VIDIOC_S_PARM, &stream_param) < 0)//设置设备参数
+    if (xioctl(g_fd, VIDIOC_S_PARM, &stream_param) < 0)
     {
         log_error( "%s does not support streaming i/o\n", g_cap_param.dev);
         return -1;
@@ -570,20 +570,19 @@ static int init_device(void)
 
     cropcap.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
-    if (0 == xioctl(g_fd, VIDIOC_CROPCAP, &cropcap))//查询摄像头的捕捉能力
+    if (0 == xioctl(g_fd, VIDIOC_CROPCAP, &cropcap))
     {
-    	//最大捕捉图片矩形
         log_debug("\tcropcap.type: %d\n", cropcap.type);
         log_debug("\tcropcap.bounds.left: %d\n", cropcap.bounds.left);
         log_debug("\tcropcap.bounds.top: %d\n", cropcap.bounds.top);
         log_debug("\tcropcap.bounds.width: %d\n", cropcap.bounds.width);
         log_debug("\tcropcap.bounds.height: %d\n", cropcap.bounds.height);
-        //默认捕捉图片矩形
+
         log_debug("\tcropcap.defrect.left: %d\n", cropcap.defrect.left);
         log_debug("\tcropcap.defrect.top: %d\n", cropcap.defrect.top);
         log_debug("\tcropcap.defrect.width: %d\n", cropcap.defrect.width);
         log_debug("\tcropcap.defrect.height: %d\n", cropcap.defrect.height);
-        // 定义了图片的宽高比
+
         log_debug("\tcropcap.pixelaspect.numerator: %d\n", cropcap.pixelaspect.numerator);
         log_debug("\tcropcap.pixelaspect.denominator: %d\n", cropcap.pixelaspect.denominator);
         log_debug("\n");
@@ -592,7 +591,7 @@ static int init_device(void)
         crop.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         crop.c = cropcap.defrect; /* reset to default */
 
-        if (-1 == xioctl(g_fd, VIDIOC_S_CROP, &crop))//设置视频捕捉的格式
+        if (-1 == xioctl(g_fd, VIDIOC_S_CROP, &crop))
         {
             switch (errno)
             {
@@ -631,13 +630,13 @@ static int init_device(void)
         fmt.fmt.pix.sizeimage,
         fmt.fmt.pix.bytesperline);
 
-    if (-1 == xioctl(g_fd, VIDIOC_S_FMT, &fmt)) {//设置视频的帧格式
+    if (-1 == xioctl(g_fd, VIDIOC_S_FMT, &fmt)) {
         errno_dump("VIDIOC_S_FMT");
         return -1;
     }
 
     /* Dump Format Setting */
-    if (-1 == xioctl(g_fd, VIDIOC_G_FMT, &fmt)) {//查询视频的帧格式
+    if (-1 == xioctl(g_fd, VIDIOC_G_FMT, &fmt)) {
         errno_dump("VIDIOC_G_FMT");
         return -1;
     }
@@ -681,7 +680,6 @@ static int close_device(void)
     g_fd = -1;
 }
 
-//根据设备名称打开指定的设备，并返回文件描述符
 static int open_device(const char* dev_name)
 {
     struct stat st;
@@ -689,13 +687,13 @@ static int open_device(const char* dev_name)
 
     log_debug("%s: called!\n", __func__);
 
-    if (-1 == stat(dev_name, &st))//通过设备名称获取设备的信息，存储在st中，成功返回0,失败返回-1，错误存储于errno
+    if (-1 == stat(dev_name, &st))
     {
         log_error("Cannot identify '%s': %d, %s\n", dev_name, errno, strerror(errno));
         return -1;
     }
 
-    if (!S_ISCHR(st.st_mode))//文件的类型和存取的权限,S_ISCHR通过S_IFMT 0170000的文件类型位遮罩判断文件类型是否为S_IFCHR 0020000字符文件
+    if (!S_ISCHR(st.st_mode))
     {
         log_error("%s is no device\n", dev_name);
         return -1;
@@ -711,7 +709,7 @@ static int open_device(const char* dev_name)
 
     return fd;
 }
-//打开并初始化视频捕捉设备参数
+
 static int fpga_open(input_param_t* param)
 {
     log_debug("%s called\n", __func__);
@@ -719,7 +717,7 @@ static int fpga_open(input_param_t* param)
 
     memcpy(&g_cap_param, param, sizeof(input_param_t));
 
-    fd = open_device(g_cap_param.dev);//打开设备并获取设备文件描述符
+    fd = open_device(g_cap_param.dev);
     if (fd <= 0)
     {
         return -1;

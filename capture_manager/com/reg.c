@@ -51,8 +51,7 @@ void reg_write(uint8_t reg, uint16_t value)
 //if you want to ARM to control the FPGA registers, the controller must be set to ARM
 #define REG_GLOBAL_CONTROL 0x10
 #define REG_GLOBAL_CONTROL_MASK_CONTROLLER 0x8000
-void reg_set_controller(enum fpga_reg_controller
- controller)
+void reg_set_controller(enum fpga_reg_controller controller)
 {
     uint16_t data = reg_read(REG_GLOBAL_CONTROL);
     if (controller == FPGA_REG_CONTROLLER_ARM)
@@ -87,7 +86,7 @@ int reg_set_source_format(enum CameraId camera, enum CapMode mode)
             break;
         case CAP_MODE_DUAL_CAMERA_COLOR:
             fpgamode = 0x6024;
-            bufcnt = 0xbc; //0x01
+            bufcnt = 0x01;
             outputcnt = bufcnt;
             break;
         case CAP_MODE_BACKGROUND_SUB:

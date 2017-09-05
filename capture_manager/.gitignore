@@ -1,0 +1,4 @@
+*.o
+*.obj
+inc
+capture_manager

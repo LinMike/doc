@@ -64,6 +64,7 @@ typedef struct {
     centroid_t centroid;
 } contour_t;
 
+#define MAX_CONTOUR_SEQ_NUMBER 127 //as only 7 bits are assigned to store the sequence number
 typedef struct {
     int err; //0: no error, otherwise this frame has something wrong, all other data should be discarded
     uint8_t seq_number; //the seq_number is used to determine whether any frame is dropped by fpga or csi driver

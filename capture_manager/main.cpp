@@ -499,7 +499,7 @@ int main(int argc, char** argv)
     if (g_save_frame_count > 0)
     {
         log_info("Receive request to save %d frames!\n", g_save_frame_count);
-        capmgr_save(g_save_frame_count, g_skip_frame_count, NULL);//跳过前多少帧后保存多少帧的图片数据
+        capmgr_save(g_save_frame_count, g_skip_frame_count, NULL);
     }
 
     ret = pthread_create(&ctrl_thread_id, NULL, thread_control, NULL);

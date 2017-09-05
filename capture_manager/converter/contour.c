@@ -279,7 +279,7 @@ static int parse_contour_edge(const uint8_t* const data, contour_t* contour, uin
     return 0;
 }
 
-static int parse_contour_points(const uint8_t* const data, contour_t* contour, uint8_t* seq_num)
+static int parse_contour_points(const uint8_t* const data, contour_t* contour)
 {
     int i, dir;
     point_t *addr;
@@ -290,9 +290,6 @@ static int parse_contour_points(const uint8_t* const data, contour_t* contour, u
     {
         return CONTOUR_END; //read the last coutour
     }
-
-    //get sequence number
-    *seq_num = data[4];
 
     //Fetch the target address of the first point
     contour->count = 0;
@@ -393,17 +390,18 @@ static int parse_one_camera(const uint8_t* const data, const int size, camera_co
 {
     int i, ret;
     const uint8_t* contour_data;
-    uint8_t seqnum;
     contour_t* contour;
 
     cfc->num_of_contours = 0;
     cfc->err = 0;
     contour = &cfc->contours[0];
+    //The sequence number is always stored at the last row's 4th byte (7 bit MSB),
+    //so it can be extracted in advance
+    cfc->seq_number = ((data[CONTOUR_FRAME_SIZE - CONTOUR_FRAME_WIDTH + 3] & 0xFE) >> 1);
     for ( i = 0; i < size; i += CONTOUR_FRAME_WIDTH)
     {
         contour_data = data + i;
-
-        ret = parse_contour_points(contour_data, contour, &seqnum);
+        ret = parse_contour_points(contour_data, contour);
         if (ret == CONTOUR_END)
         {
             break;
@@ -421,7 +419,6 @@ static int parse_one_camera(const uint8_t* const data, const int size, camera_co
                 return ret;
         }
 
-        cfc->seq_number = seqnum;
         cfc->num_of_contours++;
         contour++;
     }
@@ -438,10 +435,21 @@ static int parse_one_camera(const uint8_t* const data, const int size, camera_co
 }
 
 
+static int calc_next_seq_num(int cur_seq_num)
+{
+    if (++cur_seq_num >= MAX_CONTOUR_SEQ_NUMBER)
+        cur_seq_num = 0;
+    return cur_seq_num;
+}
+
 static int parse_all_cameras(const uint8_t* const data, frame_contours_t* fc, int enable_centroid)
 {
     int i, c, ret;
     int data_offset = 0;
+#if ENABLE_DETAIL_PRINT
+    static int next_seq_num = MAX_CONTOUR_SEQ_NUMBER + 1;
+    int cur_seq_num;
+#endif
 
     //initialize as error, if eventually the contour is valid, this error will be cleared.
     memset(fc, 0, sizeof(frame_contours_t));
@@ -454,9 +462,19 @@ static int parse_all_cameras(const uint8_t* const data, frame_contours_t* fc, in
         if (HAS_CONTOUR_ERROR(ret))
             return ret;
         data_offset += CONTOUR_FRAME_SIZE;
+
+#if ENABLE_DETAIL_PRINT
+        //Check the seqnumber
+        cur_seq_num = fc->cameras[i].seq_number;
+        if (cur_seq_num != next_seq_num && next_seq_num <= MAX_CONTOUR_SEQ_NUMBER)
+            log_warn("Detect sequence number (curr=%d, expected=%d) is not continuous, there may be frames dropped by driver\n", cur_seq_num, next_seq_num);
+        next_seq_num = calc_next_seq_num(cur_seq_num);
+#endif
     }
+
     return CONTOUR_SUCCESS;
 }
+
 
 static void draw_square(frame_buffer_t* buf, float fx, float fy, int w, int color)
 {
