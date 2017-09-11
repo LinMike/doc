@@ -1,0 +1,40 @@
+cd protobuf-3.2.0
+首先编译出本地版本的protobuf库和编译器（protoc）:
+./autogen.sh
+sudo ./configure
+sudo make -j4
+[make check]
+sudo make install
+
+为了在ARM平台上使用protobuf，需要交叉编译protobuf库
+
+交叉编译protobuf的configure参数
+./configure --build=i386-pc-linux_gnu --host=arm-linux --with-protoc=protoc CC=/opt/fsl-linaro-toolchain/bin/arm-linux-gcc CXX=/opt/fsl-linaro-toolchain/bin/arm-linux-g++ AR=/opt/fsl-linaro-toolchain/bin/arm-linux-ar RANLIB=/opt/fsl-linaro-toolchain/bin/arm-linux-ranlib --prefix=/home/yuanf/nfs/protobuf/
+
+sudo ./configure
+sudo make -j4
+sudo make install
+
+--build=i386-pc-linux_gnu （或64位 i686-pc-linux-gnu）本地编译平台
+--with-protoc=protoc 使用protoc交叉编译
+--prefix设置安装目录
+CC、CXX、AR、RANLIB 编译工具链
+
+可能遇到的问题：
+
+Q:  arm上无法找到protobuf.so.12
+A：将Ubuntu上的libprotobuf.so.12 的链接文件拷贝到arm的/lib/下
+
+Q : 无法找到 libprotoc.so.12 文件
+ /usr/local/bin/protoc: error while loading shared libraries: libprotoc.so.12: cannot open shared object file: No such file or directory
+
+A:ldd /usr/local/bin/protoc 查看可执行文件的动态依赖库
+	linux-vdso.so.1 =>  (0x00007fff61d39000)
+	libprotoc.so.12 => not found
+	libstdc++.so.6 => /usr/lib/x86_64-linux-gnu/libstdc++.so.6 (0x00007f2ce71c9000)
+	libgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1 (0x00007f2ce6fb2000)
+	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f2ce6be8000)
+	libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007f2ce68df000)
+	/lib64/ld-linux-x86-64.so.2 (0x0000560df6aae000)
+其中libprotoc.so.12 not found ，由于没有给出环境变量的配置
+add export LD_LIBRARY_PATH=/usr/local/lib  to  ~/.bashrc 当前用户的环境

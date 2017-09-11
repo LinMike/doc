@@ -1,0 +1,130 @@
+Q:sudo cd root 
+	unkown command
+A:sudo -s 
+	cd root
+
+Q:error while loading shared libraries: libprotoc.so.9: cannot open shared object file: No such file or directory
+
+A:export LD_LIBRARY_PATH=/usr/local/lib/
+  ldconfig
+
+Q:在Path中配置了环境变量，使用sudo时找不到环境变量
+A:sudo 下的环境变量被初始化，与非sudo下的环境变量不同,例如交叉编译protobuf，导致在sudo make的时候找不到arm-linux-g++以及其他编译工具链，需要在./configure 后添加每个编译工具的绝对路径。（不清楚如何添加编译工具的路径前缀）
+
+交叉编译protobuf的configure参数
+./configure --build=i386-pc-linux_gnu --host=arm-linux --with-protoc=protoc CC=/opt/fsl-linaro-toolchain/bin/arm-linux-gcc CXX=/opt/fsl-linaro-toolchain/bin/arm-linux-g++ AR=/opt/fsl-linaro-toolchain/bin/arm-linux-ar RANLIB=/opt/fsl-linaro-toolchain/bin/arm-linux-ranlib --prefix=/home/yuanf/nfs/protobuf/(安装目录)
+
+Q:arm上无法找到protobuf.so.12 
+A：将Ubuntu上的libprotobuf.so.12 的链接文件拷贝到arm的/lib/下
+
+Q:无法找到libprotoc.so.12文件
+output： /usr/local/bin/protoc: error while loading shared libraries: libprotoc.so.12: cannot open shared object file: No such file or directory
+A:ldd /usr/local/bin/protoc 查看可执行文件的动态依赖库
+	linux-vdso.so.1 =>  (0x00007fff61d39000)
+	libprotoc.so.12 => not found
+	libstdc++.so.6 => /usr/lib/x86_64-linux-gnu/libstdc++.so.6 (0x00007f2ce71c9000)
+	libgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1 (0x00007f2ce6fb2000)
+	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f2ce6be8000)
+	libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007f2ce68df000)
+	/lib64/ld-linux-x86-64.so.2 (0x0000560df6aae000)
+其中libprotoc.so.12 not found ，由于没有给出环境变量的配置
+add export LD_LIBRARY_PATH=/usr/local/lib to ~/.bashrc 当前用户的环境
+
+Q：arm上无法ping通127.0.0.1
+A: lo的设备IP不是127.0.0.1，所以ping不通，ifconfig lo 127.0.0.1
+
+Q:ctrl+c can't stop slave process
+A:ctrl+z stop current control process,then ps to kill master process,and fg (foreground) process which is running in background.master is killed ,so slave will stop running.
+
+root@fire /scripts$ ./capture_manager -m 6 -i 0 -o 3 -f 60
+driver=mxc_vout, card=DISP4 BG - DI1, bus=, version=0x00000000, capabilities=0x04000002
+fmt RGB565: fourcc = 0x50424752
+fmt BGR24: fourcc = 0x33524742
+fmt RGB24: fourcc = 0x33424752
+fmt RGB32: fourcc = 0x34424752
+fmt BGR32: fourcc = 0x34524742
+fmt NV12: fourcc = 0x3231564e
+fmt UYVY: fourcc = 0x59565955
+fmt YUYV: fourcc = 0x56595559
+fmt YUV422 planar: fourcc = 0x50323234
+fmt YUV444: fourcc = 0x34343459
+fmt YUV420: fourcc = 0x32315559
+fmt YVU420: fourcc = 0x32315659
+fmt TILED NV12P: fourcc = 0x50564e54
+fmt TILED NV12F: fourcc = 0x46564e54
+fmt YUV444 planar: fourcc = 0x50343434
+cropcap.bounds.width = 1920
+cropcap.bound.height = 1080
+cropcap.defrect.width = 1920
+cropcap.defrect.height = 1080
+v4l2_output test: Allocated 4 buffers
+VIDIOC_QUERYBUF: length = 1384448, offset = 0
+VIDIOC_QUERYBUF: length = 1384448, offset = 1384448
+VIDIOC_QUERYBUF: length = 1384448, offset = 2768896
+VIDIOC_QUERYBUF: length = 1384448, offset = 4153344
+start time = 954156188 s, 384043 us
+open /dev/mem success!
+eim mmap succeed, BaseAddr=0x08000000
+global fifo open succeed
+Set FPGA Source: 0x9000 success!
+calculated frame size=40960
+Using input device: /dev/video1
+fpga_open called
+open_device:
+Camera is power on! called!
+
+camera fpga: change mode to 4, 1280x720
+	driver: mxc_v4l2Camera is power on!
+	card:  
+	bus_info: 
+	version: 0.1.11
+	capabilities: 0x05000005
+
+camera fpga: change mode to 6, 160x128
+!!init-csi-interface: width=160, height=128, ipu=1, csi=1, clk_mode=0, data_width=1, pixclk_pol=0, 	        Vsync_pol=0, Hsync_pol=0, data_en_pol=0, ext_vsync=1, data_fmt=1448695129,crop_width=160, crop_height=128	cropcap.type: 1
+	cropcap.bounds.left: 0
+	cropcap.bounds.top: 0
+	cropcap.bounds.width: 160
+	cropcap.bounds.height: 128
+	cropcap.defrect.left: 0
+	cropcap.defrect.top: 0
+	cropcap.defrect.width: 160
+	cropcap.defrect.height: 128
+	cropcap.pixelaspect.numerator: 0
+	cropcap.pixelaspect.denominator: 0
+
+
+VIDIOC_S_FMT: resolution=160x128, pixfmt=YUYV, imagesize=0, bytesperline=0
+VIDIOC_G_FMT: resolution=160x128, pixfmt=YUYV, imagesize=40960, bytesperline=320
+init_mmap: called!
+	req.count: 4
+	req.type: 1
+	req.memory
+YUYV
+: 1
+
+framebuffer: screen:1920x1080, vscreen:1920x3240
+bits_per_pixel: 16, fbsize=4147200, x,yoffset=0,0
+R: len=5, offset=11, msb=0
+G: len=6, offset=5, msb=0
+B: len=5, offset=0, msb=0
+dropframe flag: 1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111
+================================
+    input: fpga input
+   output: HDMI framebuffer output
+converter: Contours to YUV420
+================================
+fpga_start called
+start_capturing: called!
+	buffer queued!
+	buffer queued!
+	buffer queued!
+	buffer queued!
+fb_start is called
+Input/Output has been started!
+control thread startcapmgr thread startCamera is power down!
+[1]+  Terminated                 ./master master_q.ini
+root@fire /scripts$ 
+imx-ipuv3 imx-ipuv3.1: IPU Warning - IPU_INT_STAT_10 = 0x02000000
+
+root@fire /scripts$ 
