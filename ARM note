@@ -1,0 +1,20 @@
+关闭pc linux防火墙，防止无法共享nfs文件
+	iptables -F
+	或sudo ufw diable
+
+启动本地pc的nfs service
+	service nfs-kernel-server start (status 查看状态 ，restart 重启)
+启动本地pc的portmap service
+	service portmap start ( ... )
+将NFS server的文件共享给192.168.2.×网段，读写权限
+	vi /etc/exports
+	/home/robot/nfs 192.168.2.*(rw,sync,no_root_squash,no_subtree_check)
+其中，“/”表可访问目标机的根目录，“192.168.0.*”表该类型的IP可挂载宿主机，"rw"表访问权限，
+“no_root_squash”表NFS 服务器共享目录用户的属性，如果用户是 root，那么对于这个共享目录来说就具有 root 的权限
+如果要共享给任意ip则 *(rw,...)
+
+在/etc/rc.d/rc.local文件中包含arm系统启动时的一些网络配置的shell，如ifconfig eth0, mount nfs等，arm系统开机时会挂在PC的共享文件。
+/etc/rc.d/rc_mxc.S  /etc/rc.d/rc_gpu.S 
+如果本地pc与arm的有线连接ip是DHCP模式，那么可以省略ifconfig eth0 192.168.2.221 和 ifconfig eth0 192.168.2.200（测试尚未通过）
+或者有线连接设置ip为手动模式，ip为192.168.2.200,但是如果这种模式连接多个arm会有冲突。
+
