@@ -1,0 +1,6 @@
+下载并安装SecureCRT
+wget http://download.boll.me/securecrt_linux_crack.pl 下载破解工具
+whereis SecureCRT 查看软件安装目录 /usr/bin/securecrt
+sudo perl securecrt_linux_crack.pl /usr/bin/SecureCRT
+将输出的注册信息输入到软件的注册信息框进行激活
+
