@@ -1,3 +1,5 @@
+参考：http://www.cnblogs.com/mchina/archive/2013/01/03/2840040.html
+
 一、关闭pc linux防火墙，防止无法共享nfs文件
 	iptables -F
 	或sudo ufw diable
@@ -6,9 +8,11 @@
 	service nfs-kernel-server start (status 查看状态 ，restart 重启)
 三、启动本地pc的portmap service
 	service portmap start ( ... )
-将NFS server的文件共享给192.168.2.×网段，读写权限
+四、将NFS server的文件共享给192.168.2.×网段，读写权限
 	vi /etc/exports
 	/home/robot/nfs 192.168.2.*(rw,sync,no_root_squash,no_subtree_check)
+在启动nfs后修改该文件需要 exportfs 命令重现加载配置文件。
+
 其中，“/”表可访问目标机的根目录，“192.168.0.*”表该类型的IP可挂载宿主机，"rw"表访问权限，ro表示只读权限，
 “no_root_squash”表NFS 服务器共享目录用户的属性，如果用户是 root，那么对于这个共享目录来说就具有 root 的权限
 root_squash 登入NFS主机，使用该共享目录是相当于该目录的拥有者，但如果是以root身份使用这个共享目录的时候这个使用者的权限会被压缩成为匿名使用者，uid和gid变为nobody

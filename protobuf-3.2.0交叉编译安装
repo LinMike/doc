@@ -7,7 +7,7 @@ sudo make -j4
 sudo make install
 
 为了在ARM平台上使用protobuf，需要交叉编译protobuf库
-
+make clean
 交叉编译protobuf的configure参数
 ./configure --build=i386-pc-linux_gnu --host=arm-linux --with-protoc=protoc CC=/opt/fsl-linaro-toolchain/bin/arm-linux-gcc CXX=/opt/fsl-linaro-toolchain/bin/arm-linux-g++ AR=/opt/fsl-linaro-toolchain/bin/arm-linux-ar RANLIB=/opt/fsl-linaro-toolchain/bin/arm-linux-ranlib --prefix=/home/yuanf/nfs/protobuf/
 
@@ -15,7 +15,7 @@ sudo ./configure
 sudo make -j4
 sudo make install
 
---build=i386-pc-linux_gnu （或64位 i686-pc-linux-gnu）本地编译平台
+--build=i386-pc-linux_gnu （或64位 i686-pc-linux-gnu, --build=x86_64-linux-gnu）本地编译平台 /usr/arm-linux-gnueabi/bin
 --with-protoc=protoc 使用protoc交叉编译
 --prefix设置安装目录
 CC、CXX、AR、RANLIB 编译工具链
