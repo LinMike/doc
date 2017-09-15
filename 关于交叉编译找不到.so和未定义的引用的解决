@@ -1,3 +1,9 @@
 
 原本在电脑上安装的交叉编译工具链版本为arm-linux-gnueabi-gcc -v 5.4.0,由于arm开发板上的arm-linux-gcc版本为4.6.x，所以版本不一致导致在虚拟机上用4.6.x编译安装的opencv、boost、protobuf动态链接库在安装有5.4.0的linux上无法被正确链接，因此编译提示未定义的引用，于是拷贝虚拟机上的交叉编译工具到linux上，然后将/opt/fsl-linaro-toolchain添加到PATH路径（export in ～/.bashrc）,此时arm-linux-gcc的版本为4.6.x,修改makefile链接由这个版本工具链编译安装的.so文件，就能正确编译链接。
 另外，在链接时通过-L指定opencv链接库的路径时，由于链接库之间有依赖关系，而因为依赖而加载的链接库无法通过-L指定路径，因此可能会出现：AAA.so needed by BBB.so , not found 的情况,所以需要通过-Wl,rpath,/home/robot/opencv/lib来指定一个具体的路径去加载链接库文件。但是此处有个奇怪的情况，编译工具会从上一个-L路径的../../lib目录去加载，因此在添加-Wl之后可能还需要将lib文件夹拷贝一份到上级目录（例如与opencv同级目录）
+
+./master: /usr/lib64/libstdc++.so.6: version `GLIBCXX_3.4.21' not found (required by ./master)        
+./master: /lib64/libc.so.6: version `GLIBC_2.15' not found (required by ./master)
+出现上面的情况是在使用v5.4.0编译master后在arm开发板上运行，开发板上的版本较低，没有安装GLIBCXX_3.4.21
+由于编译动态链接库的编译器和编译程序的编译器版本不一致，其所使用的gcc版本不同。
+
