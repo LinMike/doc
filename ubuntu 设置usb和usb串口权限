@@ -1,0 +1,10 @@
+一、在/etc/udev/rules.d/目录下新建一个文件，取名可以是90-tofu.rules， 内容如下：
+
+SUBSYSTEM=="usb", ATTRS{idProduct}=="f408", ATTRS{idVendor}=="040e", GROUP="tofu", MODE="0666"
+
+
+二、在/etc/udev/rules.d/目录下新建一个文件，取名可以是90-tofu.rules， 内容如下：
+
+SUBSYSTEMS=="usb-serial", KERNEL=="ttyUSB?", GROUP="tofu", MODE="0666"
+
+这一这里SUBSYSTEM后面多个S。 
