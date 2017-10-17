@@ -1,0 +1,38 @@
+--------------------------------------------------
+armhf编译boost,修改project-config.jam：
+
+using gcc : arm : arm-linux-gnueabihf-gcc ;
+
+# These settings are equivivalent to corresponding command-line
+# options.
+option.set prefix : /opt/gcc-linaro-arm-linux-gnueabihf-4.7 ;
+option.set exec-prefix : /opt/gcc-linaro-arm-linux-gnueabihf-4.7/bin ;
+option.set libdir : /opt/gcc-linaro-arm-linux-gnueabihf-4.7/arm-linux-gnueabihf/lib ;
+option.set includedir : /opt/gcc-linaro-arm-linux-gnueabihf-4.7/arm-linux-gnueabihf/include/c++/4.7.1 ;
+
+编译指令：
+./bootstrap.sh
+./bjam stage --layout=tagged [--build-type=complete]
+copy boost to include
+copy stage/lib to lib
+----------------------------------------------------
+
+----------------------------------------------------
+armhf编译opencv
+cd opencv-2.4.13.2
+mkdir build & cd build
+cmake -DCMAKE_TOOLCHAIN_FILE=../platforms/linux/arm-gnueabi.toolchain.cmake -DENABLE_VFPV3=ON -DENABLE_NEON=ON -DHARDFP=ON -DCMAKE_INSTALL_PREFIX=/1soft/opencv ..
+sudo make -j4
+sudo make install
+
+----------------------------------------------------
+
+-----------------------cmake-gui编译-----------------------------
+cross compile opencv
+problem:
+libzlib.a could not read ...
+
+solve:
+edit CMakeCache.txt ,add -O3 -fPIC -W -Wall to the C_FLAGS and CXX_FLAGS
+such as  C_FLAGS= -O3 -fPIC -W -Wall , and CXX_FLAGS too.
+-----------------------------------------------------------------

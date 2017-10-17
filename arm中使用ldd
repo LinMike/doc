@@ -1,0 +1,24 @@
+
+
+ldd是一个脚本命令，基于shell，要在arm平台上使用，需进行如下操作：
+
+1、 找到/usr/local/arm//arm-linux/sys-root/usr/bin/ldd，编辑之
+
+2、 第一行#! /bin/bash改为busybox sh所在路径如#!/bin/sh
+
+3、 修改RTLDLIST=/lib/ld-linux.so.2为开发板对应的版本
+
+4、 将ldd拷贝到开发板/sbin目录
+
+5、 OK……ldd yourapp
+
+
+偶尔情况，可能会出现这个错误：
+	
+$ toolchain-arm-linux-gnueabihf/bin/arm-linux-gnueabihf-ldd mosquitto_sub
+arm-linux-gnueabihf-ldd: no root given
+Try `arm-linux-gnueabihf-ldd --help' for more information
+
+这时候你需要使用–root选项（引入交叉工具链目录下的lib）：
+	
+$ toolchain-arm-linux-gnueabihf/bin/arm-linux-gnueabihf-ldd --root toolchain-arm-linux-gnueabihf mosquitto_sub 

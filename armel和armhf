@@ -1,0 +1,43 @@
+出于低功耗、封装限制等种种原因，之前的一些ARM架构处理器因为内部资源宝贵，加入浮点运算单元是十分奢侈的，因为需要额外的软件实现。随着技术发展，目前高端的ARM处理器已经具备了硬件执行浮点操作的能力。这样新旧两种架构之间的差异，就产生了两个不同的嵌入式应用程序二进制接口（EABI）——软浮点与矢量浮点（VFP）。但是软浮点（soft float）和硬浮点（hard float）之间有向前兼容却没有向后兼容的能力，也就是软浮点的二进制接口（EABI）仍然可以用于当前的高端ARM处理器。
+fpu单元
+
+在ARM体系架构内核中，有些有浮点运算单元（fpu），有些没有。对于没有fpu内核，是不能使用armel和armhf的。在有fpu的情况下，就可以通过gcc的选项-mfloat-abi来指定使用哪种，有如下三种值：
+
+    soft：不用​fpu计算，即使有fpu浮点运算单元也不用。
+    armel：也即softfp，用fpu计算，但是传参数用普通寄存器传，这样中断的时候，只需要保存普通寄存器，中断负荷小，但是参数需要转换成浮点的再计算。
+    armhf：也即hard，用fpu计算，传参数用fpu中的浮点寄存器传，省去了转换性能最好，但是中断负荷高。
+
+kernel、rootfs和app编译的时候，指定的必须保持一致才行。
+
+使用softfp模式，会存在不必要的浮点到整数、整数到浮点的转换。而使用hard模式，在每次浮点相关函数调用时，平均能节省20个CPU周期。对ARM这样每个周期都很重要的体系结构来说，这样的提升无疑是巨大的。
+
+在完全不改变源码和配置的情况下，在一些应用程序上，虽然armhf比armel硬件要求（确切的是指fpu硬件）高一点，但是armhf能得到20-25%的性能提升。对一些严重依赖于浮点运算的程序，更是可以达到300%的性能提升。
+armel与armhf
+
+之前EABI中，armel（低端ARM硬件，支持armv4以上版本），在执行浮点运算之前，浮点参数必须首先通过整数寄存器，然后传递到浮点运算单元。新的EABI ，也就是armhf，通过直接传递参数到浮点寄存器优化了浮点运算的调用约定。
+
+相比我们熟悉的armel，armhf代表了另一种不兼容的二进制标准。在一些社区的支持下，armhf目前已经得到了很大的发展。像Ubuntu，已经计划在之后的发行版中放弃armel，转而支持armhf编译的版本。正如目前依然很火热的Raspberry Pi（ARM11），由于ubuntu只支持armv7架构的编译，Raspberry Pi将不能直接安装ubuntu系统。而BB Black（Cortex-A8）和Cubietruct（Cortex-A7）则同时支持ubuntu的armel与armhf的编译。
+安装armel和armhf
+
+以上就是armel与armhf的比较。相信大家也应该有个大概的了解了。在Ubuntu系统下，如何根据需求分别实现两种交叉编译器的安装呢？
+arm-linux-gnueabi的安装
+
+sudo apt-get install gcc-arm-linux-gnueabi
+
+按操作下载即可，没啥好说的。
+ arm-linux-gnueabihf的安装
+
+两种方法，
+
+    linaro开源组织有相关的交叉工具链下载，点击进入网页选择下载即可，地址：https://launchpad.net/linaro-toolchain-binaries。
+    到本站工具链页面下载，地址：http://www.veryarm.com/arm-linux-gnueabihf-gcc。
+
+然后就是解压到自定义目录中，并添加bin环境变量。
+armhf 使用
+
+armhf的开启需要硬件的支持，在Debian的wiki上要求ARMv7 CPU、Thumb-2指令集以及VFP3D16浮点处理器。
+
+在gcc的编译参数上，使用-mfloat-abi=hard -mfpu=vfp即可。
+
+在工具上，CodeSourcery最早支持hard模式。或者，也可已自己编译工具链。
+

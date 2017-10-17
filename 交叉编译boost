@@ -1,0 +1,46 @@
+下载解压boost，安装交叉编译器至指定位置，设置编译器路径到 PATH
+
+
+1.首先运行boost解压目录下的
+
+./bootstrap.sh
+
+ 
+
+2.修改生成的project-config.jam文件
+
+修改：
+
+using gcc : arm : arm-none-linux-gnueabi-gcc ; 
+
+修改(这边不改也没事)：
+
+option.set prefix :(交叉编译器所在位置);
+
+option.set exec-prefix :(交叉编译器所在位置)/bin ;
+
+option.set libdir :(交叉编译器所在位置)/lib ;
+
+option.set includedir :(交叉编译器所在位置)/include ;
+
+# These settings are equivivalent to corresponding command-line
+# options.
+option.set prefix : /opt/gcc-linaro-arm-linux-gnueabihf-4.7 ;
+option.set exec-prefix : /opt/gcc-linaro-arm-linux-gnueabihf-4.7/bin ;
+option.set libdir : /opt/gcc-linaro-arm-linux-gnueabihf-4.7/arm-linux-gnueabihf/lib ;
+option.set includedir : /opt/gcc-linaro-arm-linux-gnueabihf-4.7/arm-linux-gnueabihf/include/c++/4.7.1 ;
+
+3.测试编译效果
+
+./bjam stage --layout=tagged --build-type=complete
+
+还可以加(link=shared runtime-link=shared threading=multi)等编译参数
+
+OK，编译完成
+4.将boost文件夹拷贝到arm-linux-gcc 的include目录下；
+5.将stage文件夹下的lib拷贝到lib下
+
+
+
+
+

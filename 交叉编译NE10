@@ -1,0 +1,10 @@
+cd $NE10_PATH
+mkdir build && cd build
+export NE10_LINUX_TARGET_ARCH=armv7                      # Can also be "aarch64"
+cmake -DCMAKE_TOOLCHAIN_FILE=../GNUlinux_config.cmake -DNE10_BUILD_SHARED=ON ..
+make
+
+Additionally, for systems without hardware floating point support, the appropriate compilation options should be added to the `CMAKE_C_FLAGS` and `CMAKE_ASM_FLAGS` variables in the root `CMakeLists.txt` file. For example, `-mfloat-abi=softfp -mfpu=neon`.
+
+
+see /doc/building.md

@@ -1,0 +1,88 @@
+u-boot
+从ftp://ftp.denx.de/pub/u-boot/ 下载uboot源码
+选择接近的硬件配置文件,u-boot/board/freescale/mx6qsabreauto作为imx6q板的编译配置文件
+export ARCH=arm
+export CROSS_COMPILE=/opt/gcc-linaro-arm-linux-gnueabihf-4.7/bin/arm-linux-gnueabihf-
+make mx6qsabreauto
+make
+
+烧写启动
+经过前面的移植工作，uboot已经可以正常运行在imx6q开发板上了。
+sudo dd if=u-boot.imx of=/dev/sdb bs=512 seek=2
+
+其中u-boot/tools/mkimage在交叉编译kernel时需要用到
+
+
+kernel
+
+下载linux-3.10.4内核
+
+修改makefile文件
+    ARCH        ?= $(SUBARCH)  
+    CROSS_COMPILE   ?= $(CONFIG_CROSS_COMPILE:"%"=%)  
+修改为
+    ARCH        ?= arm  
+    CROSS_COMPILE   ?= /opt/gcc-linaro-arm-linux-gnueabihf-4.9/bin/arm-linux-gnueabihf-
+
+拷贝/home/robot/下载/linux-3.10.4/arch/arm/configs下的imx_v6_v7_defconfig到linux-3.14.4/重命名为.config
+
+使用make menuconfig进行配置
+	选择General setup
+		修改Cross-compiler tool prefix（new）路径
+	选择System Types
+		选择Freescale i.MX family --》 选择i.MX6 Quad/DualLite support 
+		选择Floating point emulation--》选择
+			VFP-format floating point maths                                               
+			Advanced SIMD (NEON) Extension support  
+
+	and so on ...,see http://blog.csdn.net/xie0812/article/details/10816059
+
+编译
+	sudo make uImage  LOADADDR=0x12000000
+	报错 
+	  OBJCOPY arch/arm/boot/zImage  
+	  Kernel: arch/arm/boot/zImage is ready  
+	  UIMAGE  arch/arm/boot/uImage  
+	"mkimage" command not found - U-Boot images will not be built  
+	make[1]: *** [arch/arm/boot/uImage] Error 1  
+	make: *** [uImage] Error 2  
+	需要拷贝uboot/tools下 的mkimage到/usr/bin目录下
+
+再次编译
+	robot@robot:~/下载/linux-3.10.4$ sudo make uImage  LOADADDR=0x12000000  
+	  CHK     include/generated/uapi/linux/version.h
+	  CHK     include/generated/utsrelease.h
+	make[1]: 'include/generated/mach-types.h' is up to date.
+	  CALL    scripts/checksyscalls.sh
+	  CC      scripts/mod/devicetable-offsets.s
+	  GEN     scripts/mod/devicetable-offsets.h
+	  HOSTCC  scripts/mod/file2alias.o
+	  HOSTLD  scripts/mod/modpost
+	  CHK     include/generated/compile.h
+	  Kernel: arch/arm/boot/Image is ready
+	  Kernel: arch/arm/boot/zImage is ready
+	  UIMAGE  arch/arm/boot/uImage
+	Image Name:   Linux-3.10.4
+	Created:      Thu Oct 12 15:07:25 2017
+	Image Type:   ARM Linux Kernel Image (uncompressed)
+	Data Size:    3871744 Bytes = 3781.00 kB = 3.69 MB
+	Load Address: 12000000
+	Entry Point:  12000000
+	  Image arch/arm/boot/uImage is ready
+
+
+配置menuconfig可能需要安装ncurses
+	sudo apt-get install libncurses5-dev
+
+交叉编译busybox, http://blog.csdn.net/happy_stars_2016/article/details/52620577
+
+下载源码
+make menuconfig （配置crosscompile、install path rootfs等）
+make 
+make install
+
+制作rootfs
+rootfs目录下mkdir root home... 等
+拷贝cross-gcc的lib目录下的文件到/lib
+拷贝busybox的etc到/etc
+tar jcvf FileName.tar.bz2 DirName 压缩镜像
