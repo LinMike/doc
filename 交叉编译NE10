@@ -8,3 +8,5 @@ Additionally, for systems without hardware floating point support, the appropria
 
 
 see /doc/building.md
+
+build libNE10.so by arm-gcc-4.9 and load by arm-gcc-4.7 in imx6

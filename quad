@@ -1,0 +1,29 @@
+将boost、opencv、protobuf的库文件拷贝到arm系统中
+添加lib路径到LD_LIBRARY_PATH
+TODO：把文件lib添加到rootfs.tar
+OpenCVConfig.cmake:104改成
+    set(OpenCV_INSTALL_PATH "${OpenCV_CONFIG_PATH}")
+    #set(OpenCV_INSTALL_PATH "${OpenCV_CONFIG_PATH}/../..")
+如果出现未定义的pthread函数错误
+将CMakeCache.txt:163 改成
+    CMAKE_CXX_FLAGS:STRING=-lpthread -lrt
+
+cmake -D CMAKE_TOOLCHAIN_FILE=toolchain.cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/home/robot/soft/opencv_arm -D WITH_TIFF=OFF -D WITH_1394=OFF -D WITH_V4L=OFF -D WITH_QT=OFF -D WITH_TBB=OFF -D WITH_FFMPEG=OFF -D WITH_GTK=OFF -D WITH_OPENCL=OFF ..
+
+armhf:
+cmake -DCMAKE_TOOLCHAIN_FILE=../platforms/linux/arm-gnueabi.toolchain.cmake -DCMAKE_INSTALL_PREFIX=/home/robot/soft/opencv_armhf -DCMAKE_BUILD_TYPE=Release -DENABLE_NEON=ON -DENABLE_NEON=ON ..
+
+CMakeCache.txt中默认不开启NEON和VFPv3，使用-DENABLE_NEON=ON -DENABLE_NEON=ON显示开启
+//Enable NEON instructions
+ENABLE_NEON:BOOL=OFF
+//Enable VFPv3-D32 instructions
+ENABLE_VFPV3:BOOL=OFF
+
+
+1、测试arm上debug模式运行程序的球检测时的各个代码段的耗时情况，记录耗时情况，分析对耗时情况的影响因数。
+2、在四核的arm上配置依赖库和nfs文件系统，测试程序的运行情况和耗时情况
+3、重新交叉编译opencv依赖库，解决依赖库之间的依赖路径中出现的相对路径的情况。
+
+TODO
+1、online测试四核arm板的运行情况，分析耗时情况
+

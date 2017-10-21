@@ -18,7 +18,7 @@ copy stage/lib to lib
 ----------------------------------------------------
 
 ----------------------------------------------------
-armhf编译opencv
+armhf编译opencv, see https://docs.opencv.org/2.4.13.2/doc/tutorials/introduction/crosscompilation/arm_crosscompile_with_cmake.html?highlight=neon
 cd opencv-2.4.13.2
 mkdir build & cd build
 cmake -DCMAKE_TOOLCHAIN_FILE=../platforms/linux/arm-gnueabi.toolchain.cmake -DENABLE_VFPV3=ON -DENABLE_NEON=ON -DHARDFP=ON -DCMAKE_INSTALL_PREFIX=/1soft/opencv ..
