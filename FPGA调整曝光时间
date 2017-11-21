@@ -1,0 +1,4 @@
+capture_manager camera w [0x3500 低位] [0x3501 中位] [0x3502 高位] 
+一般设置中位0x3501的值，默认为2A，修改为更大的值如4A等。
+capture_manager isp w 0x2000 0xFF 
+设置为自动曝光0xFF，但是自动曝光需要fpga自动调节，比较耗时资源。

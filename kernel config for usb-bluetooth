@@ -1,0 +1,13 @@
+kernel config for usb and bluetooth
+1. Networking support ---> Bluetooth subsystem support ---> all
+2. Device drivers ---> Input device support ---> Joystick interface
+											---> Joysticks/Gamepads
+				  ---> HID devices ---> /dev/hidraw raw HID device support
+				  				   ---> USB human interface device (full HID) support
+				  				   ---> /dev/hidraw raw HID device support 
+				  				   ---> Special HID drivers ---> Sony PS3 controller			
+				  ---> USB support ---> USB device filesystem
+				  				   ---> USB device class-devices
+				  				   ---> EHCI HCD (USB 2.0) support
+				  				   ---> USB serial converter support ---> USB generic serial driver
+				  				   									 ---> USB cp210x family of UART bridge driver  

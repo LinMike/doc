@@ -1,0 +1,2 @@
+ps -ef | grep master | grep -v grep | awk '{print $1}' | xargs kill -9
+ps -ef | grep slave | grep -v grep | awk '{print $1}' | xargs kill -9
