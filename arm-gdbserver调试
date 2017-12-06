@@ -1,0 +1,7 @@
+将gdbserver拷贝到/bin目录下
+arm中进入要调试的代码的目录，运行 gdbserver :6666（port） main
+ubuntu中进入代码目录，使用arm-linux-gnueabihf-gdb main运行程序
+然后在gdb参数中输入target remote 192.168.2.222:6666运行调试
+b main.cpp : 82(line number) 设置断点
+输入 c (continue)运行
+
