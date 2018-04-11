@@ -1,0 +1,12 @@
+卸载nvidia驱动：
+sudo apt-get remove --purge nvidia-*
+sudo apt-get install ubuntu-desktop
+sudo rm /etc/X11/xrog.conf
+echo 'nouveau' | sudo tee -a /etc/modules
+sudo reboot
+
+循环登录的原因查找
+cd ~
+ls -a
+gedit .xseesion-errors 
+#then google it

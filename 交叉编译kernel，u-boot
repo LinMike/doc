@@ -15,7 +15,7 @@ sudo dd if=u-boot.imx of=/dev/sdb bs=512 seek=2
 
 kernel
 
-下载linux-3.10.4内核
+linux-3.0.35内核
 
 修改makefile文件
     ARCH        ?= $(SUBARCH)  

@@ -1,0 +1,2 @@
+根据name检索branch作为参数传递给git branch -D指令
+git branch | grep 'name' | xargs git branch -D  

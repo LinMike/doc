@@ -1,0 +1,6 @@
+Ubuntu 16.04添加32位库
+
+sudo apt install libc6-dev-i386  
+
+
+sudo apt-get install lib32z1  
