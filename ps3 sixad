@@ -1,0 +1,162 @@
+网上没有直接用3蓝牙连接树莓派的教程，看到一篇用2b 和 蓝牙适配器一起用 连接PS3 手柄的，所以先安装一下试试。
+
+http://tieba.baidu.com/p/3237051512
+
+
+下面就是安装必要的软件了:
+pi@raspberrypi ~ $ sudo apt-get install libusb-dev libbluetooth-dev libjack-dev 
+
+注：上面lib这个三个是必须装的，是为了后面编译要用到的 否则各种报错
+
+可以在qtsixa官网下载
+
+下载完毕后解压：
+pi@raspberrypi ~/tools/sixa $ tar -xvf QtSixA-src.tar.gz
+
+
+进入解压文件夹：
+pi@raspberrypi ~/tools/sixa $ cd QtSixA-1.5.1/
+
+
+我们先编译配对工具：
+pi@raspberrypi ~/tools/sixa/QtSixA-1.5.1 $ cd utils/
+
+
+打开“Makefile”， 把“WANT_JACK = false” 改为 “WANT_JACK = true”。
+
+
+输入“make”编译工具：
+pi@raspberrypi ~/tools/sixa/QtSixA-1.5.1/utils $ make
+mkdir -p bins
+cc -O2 -Wall -Wl,-Bsymbolic-functions hidraw-dump.c -o bins/hidraw-dump
+cc -O2 -Wall -Wl,-Bsymbolic-functions sixpair.c -o bins/sixpair `pkg-config --cflags --libs libusb`
+cc -O2 -Wall -Wl,-Bsymbolic-functions sixpair_kbd.c -o bins/sixpair-kbd `pkg-config --cflags --libs libusb`
+
+
+编译完后， 你可以在“./bins” 文件家里看到这些文件：
+pi@raspberrypi ~/tools/sixa/QtSixA-1.5.1/utils $ ls bins
+hidraw-dump sixad-jack sixpair sixpair-kbd
+
+
+下面进行配对，将手柄用数据线接入树莓派。 按下“ps”按键。
+
+
+运行“./bins/sixpair”。成功你会看到以下类似信息， 然后可以拔出你的手柄了：
+pi@raspberrypi ~/tools/sixa/QtSixA-1.5.1/utils $ sudo ./bins/sixpair
+Current Bluetooth master: xx:xx:xx:xx:xx:xx
+Setting master bd_addr to: xx:xx:xx:xx:xx:xx
+
+
+然后我们进入”../sixad/“， 编译“sixad“：
+pi@raspberrypi ~/tools/sixa/QtSixA-1.5.1/utils $ cd ../sixad/
+
+
+编译并安装”sixad“：
+pi@raspberrypi ~/tools/sixa/QtSixA-1.5.1/sixad $ make
+
+如果你的树莓派版本比较新，gcc版本大于等于4.7以上的，make会报错
+
+mkdir -p bins
+g++ -O2 -Wall -Wl,-Bsymbolic-functions sixad-bin.cpp bluetooth.cpp shared.cpp textfile.cpp -o bins/sixad-bin `pkg-config --cflags --libs bluez` -lpthread -fpermissive
+sixad-bin.cpp: In function ‘int main(int, char**)’:
+sixad-bin.cpp:84:20: warning: taking address of temporary [-fpermissive]
+sixad-bin.cpp:89:18: error: ‘close’ was not declared in this scope
+sixad-bin.cpp:100:20: error: ‘sleep’ was not declared in this scope
+sixad-bin.cpp:109:22: error: ‘close’ was not declared in this scopepi
+
+其实有很多错误 我截取了一段，都是类似这样的错误，需要改以下share.h的文件内容就可以了
+
+/*    
+ * shared.h    
+ *    
+ * This file is part of the QtSixA, the Sixaxis Joystick Manager    
+ * Copyright 2008-2011 Filipe Coelho <falktx@gmail.com>    
+ *    
+ * QtSixA can be redistributed and/or modified under the terms of the GNU General    
+ * Public License (Version 2), as published by the Free Software Foundation.    
+ * A copy of the license is included in the QtSixA source code, or can be found    
+ * online at www.gnu.org/licenses.    
+ *    
+ * QtSixA is distributed in the hope that it will be useful, but WITHOUT ANY    
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR    
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.    
+ *    
+ */    
+#ifndef SHARED_H    
+#define SHARED_H    
+#include <unistd.h>    
+struct dev_led {    
+bool enabled;    
+bool anim;    
+bool auto_sel;    
+int number;    
+};    
+struct dev_joystick {    
+bool enabled;    
+bool buttons;    
+bool axis;    
+bool sbuttons;    
+bool accel;    
+bool accon;    
+bool speed;    
+bool pos;    
+};    
+struct dev_remote {    
+bool enabled;    
+bool numeric;    
+bool dvd;    
+bool directional;    
+bool multimedia;    
+};    
+struct dev_input {    
+bool enabled;    
+int key_select, key_l3, key_r3, key_start, key_up, key_right, key_down, key_left;    
+int key_l2, key_r2, key_l1, key_r1, key_tri, key_cir, key_squ, key_cro, key_ps;    
+int axis_l_type, axis_r_type, axis_speed;    
+int axis_l_up, axis_l_right, axis_l_down, axis_l_left;    
+int axis_r_up, axis_r_right, axis_r_down, axis_r_left;    
+bool use_lr3;    
+};    
+struct dev_rumble {    
+bool enabled;    
+bool old_mode;    
+};    
+struct dev_timeout {    
+bool enabled;    
+int timeout;    
+};    
+struct device_settings {    
+bool auto_disconnect;    
+struct dev_led led;    
+struct dev_joystick joystick;    
+struct dev_remote remote;    
+struct dev_input input;    
+struct dev_rumble rumble;    
+struct dev_timeout timeout;    
+};    
+bool was_active();    
+void set_active(int active);    
+bool io_canceled();    
+void sig_term(int sig);    
+void open_log(const char *app_name);    
+struct device_settings init_values(const char *mac);    
+int get_joystick_number();    
+void enable_sixaxis(int csk);    
+#endif // SHARED_H
+
+
+这是完整文件内容，完全覆盖就可以使用
+
+
+@raspberrypi ~/tools/sixa/QtSixA-1.5.1/sixad $ sudo make install
+
+
+启动”sixad“， 按下手柄”ps“键， 等待出现以下信息就成功了：
+pi@raspberrypi ~/tools/sixa/QtSixA-1.5.1/sixad $ sudo sixad --start
+sixad-bin[6117]: started
+sixad-bin[6117]: sixad started, press the PS button now
+sixad-bin[6117]: unable to connect to sdp session
+sixad-bin[6117]: Connected Sony Computer Entertainment Wireless Controller (xx:xx:xx:xx:xx:xx)
+
+
+之后就没有错误了 按照步骤 就可以连上ps3手柄
