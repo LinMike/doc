@@ -30,13 +30,14 @@ int Serial::OpenSerial(const char* devfile, int baud)
 	{
 		oss << "error " << errno << " opening "<< devfile;
 //		logger_->Error(oss.str());
-
+		std::cout<<oss.str()<<std::endl;
 		return -1;
 	}
 	else
 	{
 		oss.str("");
 		oss << "success opening " << devfile;
+		std::cout<<oss.str()<<std::endl;
 //		logger_->Info(oss.str());
 	}
 	SetInterfaceAttribs (baud, 0);  // set speed to 115,200 bps, 8n1 (no parity)
@@ -68,6 +69,7 @@ int Serial::SetInterfaceAttribs (int speed, int parity)
     if (tcgetattr (fd_, &tty) != 0)
     {
     	oss << "error " << errno << " from tcgetattr";
+	std::cout<<oss.str()<<std::endl;
 //    	logger_->Error(oss.str());
         return -1;
     }
@@ -105,6 +107,7 @@ int Serial::SetInterfaceAttribs (int speed, int parity)
     {
     	oss.str("");
     	oss << "error " << errno << " from tcsetattr";
+	std::cout<<oss.str()<<std::endl;
     	//logger_->Error(oss.str());
         return -1;
     }
@@ -121,7 +124,7 @@ void Serial::SetBlocking (int should_block)
     {
     	oss << "error " << errno << " from tggetattr";
     	//logger_->Error(oss.str());
-
+	std::cout<<oss.str()<<std::endl;
         return;
     }
 
@@ -133,7 +136,7 @@ void Serial::SetBlocking (int should_block)
     	oss.str("");
     	oss << "error " << errno <<" setting term attributes";
     	//logger_->Error(oss.str());
-
+	std::cout<<oss.str()<<std::endl;
         return;
     }
 }
