@@ -1,0 +1,3 @@
+1.由于桌面动画效果依赖compiz，关闭compiz必须使用没有动画的桌面系统
+sudo apt-get install gnome-session-flashback
+2.reboot, and switch ubuntu logo to flashback
