@@ -2,7 +2,7 @@ close all
 clear
 %global logfile
 global pha
-fileFolder = fullfile('/home/robot/桌面/rotation/log_track/');
+fileFolder = fullfile('/home/robot/桌面/log_track/'); %/home/robot/桌面/rotation/log_track/
 dir_file = dir(fullfile(fileFolder, '*.txt'));
 
 global sum_ph;
@@ -46,9 +46,9 @@ for i=1:size(dir_file, 1) % cols
     tt = roots(p);
     
     ts = 0;
-    if tt(1,1) < 0
+    if tt(1,1) < 0 && tt(1,1) > -1
         ts = tt(1,1);
-    elseif tt(2,1) < 0
+    elseif tt(2,1) < 0 && tt(2,1) > -1
         ts = tt(2,1);
     else ts = tt(3,1);
     end
@@ -85,12 +85,16 @@ for i=1:size(dir_file, 1) % cols
     plot(aa, bb, 'o');
     hold on
 
-    m_ph = 0.25;
+    m_ph = 0.275;
     m_sx = 1.0/((1+m_ph*sin(theta))*(1+m_ph*sin(theta))) * v0*v0*sin(2*theta)/9.8 - s_real;
     fig2 = figure(2);
     plot(i, m_sx, 'x');
     hold on
 
+    fig3 = figure(3);
+    plot(aa - m_ph, m_sx, '*');
+    hold on
+    
 %     pha(i,1) = ph(2,1);
 %     pha(i,2) = vpa(sx_no_f, 5);
 %     pha(i,3) = vpa(s_real, 5);
