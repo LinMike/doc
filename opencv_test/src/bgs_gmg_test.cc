@@ -94,6 +94,7 @@ public:
 
 			cv::ellipse(draw_img, ellipse, cv::Scalar(0, 255, 0));
 			cv::circle(draw_img, ballItem.pt, ballItem.size, cv::Scalar(0, 0, 255));
+			cv::drawMarker(draw_img, ballItem.pt, cv::Scalar(255,0,0), 0, 1);
 		}
 	}
 private:
@@ -132,7 +133,7 @@ void on_mouse(int event, int x, int y, int flags, void *ustc)
 }
 int main(int argc, char *argv[])
 {
-	if(argc != 3) {
+	if(argc < 2) {
 		std::cout<<"input image path"<<std::endl;
 		return 0;
 	}
@@ -142,8 +143,8 @@ int main(int argc, char *argv[])
 		std::cout<<"empty image path"<<std::endl;
 		return 0;
 	}
-	boost::filesystem::directory_iterator it_end;
-	bgs_gmg bgs(cv::Size(1280, 1024), 2);
+
+	/*boost::filesystem::directory_iterator it_end;
 	std::vector<std::string> file_names;
 	for(boost::filesystem::directory_iterator it(img_path); it != it_end; ++it)
 	{
@@ -152,6 +153,15 @@ int main(int argc, char *argv[])
 	}
 	std::sort(file_names.begin(), file_names.end());
 	for(std::vector<std::string>::iterator it=file_names.begin();it!=file_names.end();it++)
+	{
+		std::cout<<"current process file name = "<<*it<<std::endl;
+		cv::Mat img = cv::imread(*it), draw_img;*/
+
+
+	bgs_gmg bgs(cv::Size(1280, 1024), 1);
+	std::vector<std::string> files;
+	cv::glob(img_path, files);
+	for(std::vector<std::string>::iterator it = files.begin(); it != files.end(); it++)
 	{
 		std::cout<<"current process file name = "<<*it<<std::endl;
 		cv::Mat img = cv::imread(*it), draw_img;
@@ -180,7 +190,7 @@ int main(int argc, char *argv[])
 		cv::setMouseCallback("img", on_mouse, (void*)&rect);
 		cv::imshow("img", draw_img);
 		cv::waitKey(0);
-		std::cout<<"mouse rectangle is "<<rect<<std::endl;
+/*		std::cout<<"mouse rectangle is "<<rect<<std::endl;
 
 		static int i=0;
 		std::string save_path(argv[2]);//"/home/meijian/Desktop/save_balls/left"
@@ -201,32 +211,7 @@ int main(int argc, char *argv[])
 				std::cout<<oss.str()<<std::endl;
 				cv::imwrite(oss.str(), roi_img);
 			}
-		}
-
-	/*	int i=0;
-		//TODO: set roi range in raw image to get new image 20x20 with ball
-//		if(balls.size() > 5) continue;
-		for(std::vector<cv::KeyPoint>::iterator it = balls.begin(); it != balls.end(); it++) {
-			float lt_x = it->pt.x - 20 <= 1279 ? (it->pt.x-20 > 0 ? it->pt.x-20 : 0) : 1279;
-			float lt_y = it->pt.y - 20 <= 1023 ? (it->pt.y-20 > 0 ? it->pt.y-20 : 0) : 1023;
-			float rb_x = it->pt.x + 20 <= 1279 ? (it->pt.x+20 > 0 ? it->pt.x+20 : 0) : 1279;
-			float rb_y = it->pt.y + 20 <= 1023 ? (it->pt.y+20 > 0 ? it->pt.y+20 : 0) : 1023;
-			std::cout<<cv::Point(lt_x, lt_y)<<", "<< cv::Point(rb_x, rb_y)<<"from ["<<img.rows<<", "<<img.cols<<"]"<<std::endl;
-			cv::Mat roi_img(img, cv::Rect(cv::Point(lt_x, lt_y), cv::Point(rb_x, rb_y)));
-			cv::imshow("roi img", roi_img);
-			int key = cv::saturate_cast<int>(cv::waitKey());
-			std::cout<<"recieve key t = "<<key<<std::endl;
-			if(key == 'a')
-			{
-				break;
-			}
-
-			std::ostringstream oss;
-			oss<<save_path<<"/balls_"<<i++<<".jpg";
-			std::cout<<oss.str()<<std::endl;
-			cv::imwrite(oss.str(), roi_img);
 		}*/
-
 	}
 	return 0;
 }
