@@ -5,7 +5,7 @@ using namespace cv;
  
 int main(int argc, char *argv[])
 {
-	Mat image = imread("robot.jpg");
+	Mat image = imread("balls_0.jpg");
 	Mat imageLog(image.size(), CV_32FC3);
 	for (int i = 0; i < image.rows; i++)
 	{

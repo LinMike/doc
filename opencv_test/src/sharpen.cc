@@ -8,7 +8,7 @@ using namespace cv;
 int main()
 {
 	//源图像
-	Mat scr = imread("robot.jpg");
+	Mat scr = imread("balls_0.jpg");
 	Mat rst;
 	imshow("原图像",scr);
  

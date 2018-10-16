@@ -34,12 +34,21 @@ int main(int argc, char *argv[]) {
     Slic slic;
     slic.generate_superpixels(lab_image, step, nc);
     slic.create_connectivity(lab_image);
-    slic.colour_with_cluster_means(image);
+//    slic.colour_with_cluster_means(image);
     slic.display_center_grid(image, CV_RGB(0,255,0));
     std::cout<<"centers size = "<<slic.GetCenters().size()<<std::endl;
+    float min_dis = FLT_MAX;
+    int min_x = min_y = -1;
     for(int i=0;i<slic.GetCenters().size();i++)
     {
     	std::cout<<"["<<slic.GetCenters()[i][3]<<", "<<slic.GetCenters()[i][4]<<"]"<<std::endl;
+    	float dis = sqrt(pow(slic.GetCenter()[i][3]-19,2)+pow(slic.GetCenter()[i][4]-19,2));
+    	if(dis < min_dis)
+    	{
+    		min_x = slic.GetCenter()[i][3];
+    		min_y = slic.GetCenter()[i][4];
+    		min_dis = dis;
+		}
     }
     /* Display the contours and show the result. */
     slic.display_contours(image, CV_RGB(255,0,0));

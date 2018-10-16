@@ -82,17 +82,17 @@ for i=1:size(dir_file, 1) % cols
     fig1 = figure(1);
     aa = ph(2,1);
     bb = v0*v0*sin(2*theta)/9.8 - s_real;
-    plot(aa, bb, 'o');
+    plot(aa, bb, '.');
     hold on
 
     m_ph = 0.275;
     m_sx = 1.0/((1+m_ph*sin(theta))*(1+m_ph*sin(theta))) * v0*v0*sin(2*theta)/9.8 - s_real;
     fig2 = figure(2);
-    plot(i, m_sx, 'x');
+    plot(i, m_sx, '.');
     hold on
 
     fig3 = figure(3);
-    plot(aa - m_ph, m_sx, '*');
+    plot(aa - m_ph, m_sx, '.');
     hold on
     
 %     pha(i,1) = ph(2,1);
@@ -101,7 +101,7 @@ for i=1:size(dir_file, 1) % cols
 
 end
 
-avg_pha = sum_ph / size(data, 1)
+avg_pha = sum_ph / i
 
 % 
 % x = data(:, 1);

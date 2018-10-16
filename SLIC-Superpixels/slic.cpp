@@ -264,7 +264,7 @@ void Slic::create_connectivity(IplImage *image) {
                 
                 /* Use the earlier found adjacent label if a segment size is
                    smaller than a limit. */
-                if (count <= lims >> 2) {
+                if (count <= lims >> 4) {
                     for (int c = 0; c < count; c++) {
                         new_clusters[elements[c].x][elements[c].y] = adjlabel;
                     }

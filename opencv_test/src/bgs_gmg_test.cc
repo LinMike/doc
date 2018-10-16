@@ -164,25 +164,23 @@ int main(int argc, char *argv[])
 	for(std::vector<std::string>::iterator it = files.begin(); it != files.end(); it++)
 	{
 		std::cout<<"current process file name = "<<*it<<std::endl;
-		cv::Mat img = cv::imread(*it), draw_img;
+		cv::Mat img = cv::imread(*it), draw_img, fg_img;;
 		draw_img=img.clone();
 		cv::gpu::GpuMat gpu_mat, fg_mat;
-		cv::Mat fg_img;
 		gpu_mat.upload(img);
 		fg_mat = bgs.Apply(gpu_mat);
 		fg_mat.download(fg_img);
-//		cv::erode(fg_img, fg_img, cv::Mat(), cv::Point(-1, -1), 1);
-//		cv::dilate(fg_img, fg_img, cv::Mat(), cv::Point(-1, -1), 1);
-
+		cv::erode(fg_img, fg_img, cv::Mat(), cv::Point(-1, -1), 1);
+		cv::dilate(fg_img, fg_img, cv::Mat(), cv::Point(-1, -1), 1);
+//		cv::Canny(img, fg_img, 50, 120);
 //		cv::Mat elemente = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(1, 2));
 //		cv::erode(fg_img, fg_img, elemente);
 //		cv::dilate(fg_img, fg_img, elemente);
 
-		std::cout<<"apply fg done"<<std::endl;
 		std::vector<cv::KeyPoint> balls;
 		bgs.DetectBall(fg_img.clone(), img, draw_img, balls);
 		cv::namedWindow("fg img");
-		cv::imshow("fg img", fg_img);
+		cv::imshow("fg img", draw_img);
 		cv::waitKey(0);
 
 		cv::Rect rect;
@@ -190,7 +188,7 @@ int main(int argc, char *argv[])
 		cv::setMouseCallback("img", on_mouse, (void*)&rect);
 		cv::imshow("img", draw_img);
 		cv::waitKey(0);
-/*		std::cout<<"mouse rectangle is "<<rect<<std::endl;
+		std::cout<<"mouse rectangle is "<<rect<<std::endl;
 
 		static int i=0;
 		std::string save_path(argv[2]);//"/home/meijian/Desktop/save_balls/left"
@@ -211,7 +209,7 @@ int main(int argc, char *argv[])
 				std::cout<<oss.str()<<std::endl;
 				cv::imwrite(oss.str(), roi_img);
 			}
-		}*/
+		}
 	}
 	return 0;
 }

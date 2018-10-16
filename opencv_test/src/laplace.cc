@@ -6,7 +6,7 @@ using namespace cv;
  
 int main(int argc, char *argv[])
 {
-	Mat image = imread("robot.jpg", 1);
+	Mat image = imread(argv[1]);
 	if (image.empty())
 	{
 		std::cout << "打开图片失败,请检查" << std::endl;

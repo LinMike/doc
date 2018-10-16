@@ -1,0 +1,95 @@
+#include <opencv2/opencv.hpp>
+cv::Point find_local_minimum(cv::Mat src, cv::Point center)
+{
+	float min_grad = FLT_MAX;
+	cv::Point loc_min = cv::Point(center.x, center.y);
+	
+	for(int i=center.x-1;i<=center.x+1;i++)
+	{
+		for(int j=center.y-1;j<=center.y+1;j++)
+		{	
+			cv::Scalar right = cv::Get2D(src, j+1, i);
+			cv::Scalar buttom = cv::Get2D(src, j, i+1);
+			cv::Scalar center = cv::Get2D(src, j, i);
+
+			double gray_right = right.val[0];
+			double gray_buttom = buttom.val[0];
+			double gray_center = buttom.val[0];
+
+			if(sqrt(pow(gray_right - gray_center,2)+pow(gray_buttom-gray_center,2))<min_grad)
+			{
+				min_grad = fabs(gray_right-gray_center)+fabs(gray_buttom-gray_center);
+				loc_min.x=i;
+				loc_min.y=j;
+			}
+		}
+	}
+	return loc_min;
+}
+int main(int argc, char* argv[])
+{
+	std::vector<std::string> files;
+	cv::glob(argv[1], files);
+	cv::Point center(19,19);
+	std::stringstream ss;
+	ss<<argv[2]<<argv[3];
+	int num_pixel, max_color_dst;
+	ss>>num_pixel>>max_color_dst; 
+
+	for(int k=0;k<files.size();k++)
+	{
+		std::vector<cv::Point> centers;
+		cv::Mat src = cv::imread(files[i]);
+		cv::lab_img;
+		cv::cvtColor(src, lab_img, CV_BGR2Lab);
+		float NS = sqrt(lab_img.size.w*lab_img.size.h*1.0/num_pixel);
+		
+
+		std::vector<std::vector<int> > clusters;
+		std::vector<std::vector<int> > dist;
+		for(int i=0;i<lab_img.size.width;i++)
+		{
+			std::vector<int> cluster;
+			std::vector<float> dt;
+			for(int j=0;j<lab_img.size.height;j++)
+			{
+				cluster.push_back(-1);
+				dt.push_back(FLT_MAX);
+			}
+			clusters.push_back(cluster);
+			dist.push_back(dt);
+		}
+		for(int i=0;i<lab_img.size.width - NS/2;i+=NS)
+		{
+			for(int j=0;j<lab_img.size.height - NS/2;j+=NS)
+			{
+				std::vector<float> center;
+				cv::Point c = find_local_minumum(lab_img, cv::Point(i,j));
+				cv::Scalar color = cv::Get2D(lab_img, c.x, c.y);
+
+				center.push_back(color.val[0]);
+				center.push_back(color.val[1]);
+				center.push_back(color.val[2]);
+				center.push_back(c.x);
+				center.push_back(c.y);
+
+				centers.push_back(center);
+				
+			}
+		}
+		
+
+		for(int n=0;n<num_pixel;n++)
+		{
+			for(int i=0;i<lab_img.size.width;i++)
+			{
+				for(int j=0;j<lab_img.size.height;j++)
+				{
+					
+				}
+			}
+		}
+			
+	}
+	return 0;
+}
