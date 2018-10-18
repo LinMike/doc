@@ -284,7 +284,7 @@ void Slic::create_connectivity(IplImage *image) {
  */
 void Slic::display_center_grid(IplImage *image, CvScalar colour) {
     for (int i = 0; i < (int) centers.size(); i++) {
-        cvCircle(image, cvPoint(centers[i][3], centers[i][4]), 1, colour, 0);
+        cvCircle(image, cvPoint(centers[i][3], centers[i][4]), 0, colour, 0);
     }
 }
 
