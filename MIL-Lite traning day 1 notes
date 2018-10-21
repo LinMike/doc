@@ -1,0 +1,117 @@
+MappAllocDefault(initFlag, ApplicationIdPtr, SystemIdPtr, DisplayIdPtr, DigIdPtr, ImageBuffIdPtr)
+
+此宏释放使用MappAllocDefault（）宏分配的MIL应用程序默认值。注意，此功能不会影响系统显示屏上显示的内容;如果你想清除显示，你应该在调用MappFreeDefault()之前使用MdispDeselect（）
+
+使用MILConfig工具去修改MIL的默认设置，default system， digitizer， display， and buffer
+如果您经常使用相同的相机并且更喜欢使用MappAllocDefault（）来设置和初始化您的系统，您可能需要更新MILConfig文件以反映您的相机
+
+安装后，如果指定了彩色摄像机，则使用MappAllocDefault（）分配的默认图像缓冲区将是三波段彩色图像缓冲区。但是，如果您没有指定彩色相机，但现在更喜欢使用彩色相机，则可能需要更新MILConfig以反映分配彩色相机和彩色图像缓冲区所需的默认值
+
+MIL_ID  MilApplication,
+        MilSystem,
+        MilDisplay,
+        MilDigitizer,
+        MilImage;
+
+/*init resourse*/        
+MappAllocDefault(M_COMPLETE, &MilApplication, &MilSystem, &MilDisplay, &MilDigitizer, &MilImage);
+
+/*grab continuously image data*/
+MdiaGrabContinuous(MilDIagitizer, MilImage);
+
+MosGetch(); // get enter key to stop grab
+
+/*stop continuous grab*/
+MdiaHalt(MilDiagitizer);
+
+MosGetch();// get enter key to start single image
+
+/*monoshot grab*/
+MdigGrab(MilDigitizer, MilImage);
+
+MosGetch();//get enter key to free default resource
+
+/*free default resource*/
+MappFreeDefault(MilApplication,	MilSystem, 	MilDisplay, MilDigitizer, MilImage);
+
+
+                        Installing MIL
+在安装过程中，系统会询问您一些问题，例如：
+•要安装程序的驱动器和目录。
+•在64位OS（32位或64位或两者）的情况下安装MIL的平台。
+•计算机中安装的Matrox硬件类型（例如，Matrox Morphis）。
+•是否安装MGA驱动程序。只会询问您是否有带显示部分或Matrox图形卡的Matrox成像板，并且要安装的驱动程序比计算机上已有的驱动程序更新。
+•使用MILConfig实用程序（稍后解释）中指定的默认配置时，默认情况下要加载的数字化仪和显示格式。如有必要，可在以后修改
+
+如果您没有在安装时选择给定电路板的驱动程序，并且希望在系统中添加此类型的电路板，则必须卸载MIL并重新安装	
+如果您不确定将来是否要添加新电路板，请选择所有电路板;如果您选择稍后添加电路板，这可确保所有驱动程序都存在
+
+
+configure the display type
+帧抓取器抓取数据的图像可以显示在Windows桌面上的窗口中（部分或扩展）。对于后一种情况，请注意某些电路板（如VIO）可能具有辅助显示器的特殊功能;有关详细信息，请参阅特定于板的MdispControl（）参考
+
+non-paged memory size 
+需要在此处指定为抓取缓冲区保留的线性非分页内存（DMA）的数量。保留的非分页内存量还会确定操作系统可用的剩余RAM量.
+您可以为任何板选择的最小线性非分页内存量为1 MB
+
+测试安装结果
+您可以编译并运行我们的示例程序mappstart.exe，在\ Users \ Public \ Documents \ Matrox Imaging \ Mil \ Examples \ mappstart目录中，以测试安装。请注意，MIL提供了所有示例的编译版本
+
+MIL Control Center
+通过MIL Control Center，您可以访问所有MIL示例和工具
+
+Matrox intellicam
+
+
+Creating a new MIL project in C++
+•要编译MIL应用程序，除了必需的标准C包含文件外，还必须包含mil.h头文件。编译完应用程序后，必须将其与适用于操作系统，编译器和目标板的库或导入库相链接。 MIL库位于\ Matrox Imaging \ Mil \ LIB目录中。
+•强烈建议您熟悉MIL的众多示例;通常情况下，当使用适当的示例作为起点时，看似复杂的应用程序会变得简化
+
+                        MIL Portability
+MIL data types : portable and os independent.
+
+MIL_INT 
+    指定一个整数值
+    补充传统的int和long数据类型
+    数据深度在32位操作系统上为32位，在64位操作系统上为64位
+MIL_UINT
+    指定一个无符号整数的值
+    数据深度与MIL_INT相同 
+MIL_DOUBLE
+    指定一个双精度浮点数据类型
+    
+包含的数据类型有 signed, unsigned, and fixed-length versions of MIL_INT, MIL_UINT, MUL_DOUBLE 数据类型
+
+fixed-length data types
+MIL_INT8, MIL_INT16, MIL_INT32, MIL_INT64
+MIL_UINT8, ...
+
+
+MIL_TEXT_CHAR
+    字符串数组
+    替换 char 数据类型
+MIL_TEXT_PTR
+    指向字符串数组的指针
+    替换 char*
+MIL_CONST_TEXT_PTR
+    指向字符串常量数组的指针
+    代替 const char*
+MIL_TEXT_CHAR, MIL_TEXT_PTR, and MIL_CONST_TEXT_PTR
+    在应用程序以ASCII获unicode编译都能使用
+    提供两个编译器选项之间的可移植性
+    
+MIL_ID 
+    只有可用于声明MIL标识符的选项
+    用于标识资源（缓冲区，系统和上下文）
+example:
+MIL_ID  Milapplication,
+        MilSystem,
+        MilDisplay,
+        MilImage;
+MappAllocDefault(M_DEFAULT, &MilApplication, &MilSystem,
+                    &MilDisplay, &M_NULL, &MilImage);
+                    
+                    
+                    
+                    MIL Porability  
+                    
