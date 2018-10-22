@@ -114,4 +114,110 @@ MappAllocDefault(M_DEFAULT, &MilApplication, &MilSystem,
                     
                     
                     MIL Porability  
-                    
+ASCII/Unicode
+
+UTF-16
+    16位Unicode转换格式
+    可变宽度字符编码
+    整个Unicode字符库可编码为16位单词序列
+    windows默认的编码格式
+    在编译为Unicode客户机时MIL采用的编码格式
+UTF-8
+    8位Unicode转换格式
+    可变宽度的字符编码
+    与ASCII兼容的字节码和字符分配的初始编码
+    每个字符编码为1～4个字节
+        1字节用于表示128个US-ASCII字符
+        其他字节数用于表示其他字符集
+    如果应用在使用Unicode编码的客户机上编译，MIL将使用该编码格式
+    Linux默认的编码格式
+    windows不完全支持的编码格式
+UTF & Windows behavier
+    许多windows程序在文件开始时添加字节序列EF BB BF，以表明文件是使用UTF-8编码的
+    当UTF-8被解释为UTF-16时，常常会导致错误
+MIL支持Unicode编码
+在编译应用是可以选择ASCII或者Unicode编码
+MIL_TEXT
+    macro用适当的编码（ASCII或Unicode）转换所提供的字符串
+    MIL_TEXT不能与char*和run-time字符串一起使用
+    只适用与静态变量或纯文本
+语法：
+    MIL_TEXT("Text to be converted");
+例：
+    MdispAlloc(MilSystem, M_DEFAULT, MIL_TEXT("M_NTSC"), M_AUXILIARY, &MilDisplay1);
+
+    MdispAlloc(MilSystem, M_DEFAULT, MIL_TEXT(""\u3088\u3046\u3053/u305d""), ...);
+
+portability function 可移植函数
+c/c++           portability Mil version             description
+
+abs()           MIL_INT MosAbs(MIL_INT n)           计算绝对值
+getch()         MIL_INT MosGetch()                  从控制台输入接收一个字符
+getchar()       MIL_INT MosGetchar()                从标准输入流读取一个字符
+kbhit()         MIL_INT MosKbhit()                  检查控制台是否有键盘输入
+main()          MIL_INT MosMain()                   主程序入口函数
+printf()        MIL_INT MosPrintf(MIL_TEXT_PTR format, ...)     格式化字符串输出到控制台
+sleep()         MIL_INT MosSleep(MIL_INT waitTime)   线程进入睡眠状态
+sprintf()       MIL_INT MosSprintf(MIL_TEXT_PTR buffer,         格式化字符串输入到buffer
+                    MIL_INT size, MIL_TEXT_PTR format, ...)
+strcat()        MIL_INT MosStrcat(MIL_TEXT_PTR strDestination,  合并字符串
+                    MIL_INT size, MIL_TEXT_PTR strSource)
+strcmp()        MIL_INT MosStrcmp(MIL_TEXT_PTR string1,         比较字符串
+                    MIL_TEXT_PTR string2)
+strcpy()        MIL_INT MosStrcpy(MIL_TEXT_PTR strDestination,  复制字符串到另一个字符串
+                    MIL_INT size, MIL_TEXT_PTR strSource)
+strlen()        MIL_INT MosStrlen(MIL_TEXT_PTR str)             获取字符串的长度
+strlwr()        MIL_INT MosStrlwr(MIL_TEXT_PTR str)             转换字符串为小写字符
+strupr()        MIL_INT MosStrupr(MIL_TEXT_PTR str)             转换字符串为大写字符
+
+
+Data Type       32-bits OS                  64-bits OS
+
+int             32-bit                      32-bit
+long            32-bit                      64-bit(linux), 32-bit(windows)
+double          64-bit                      64-bit
+MIL_INT         32-bit                      64-bit
+MIL_DOUBLE      64-bit                      64-bit
+PTR             32-bit                      64-bit
+
+Void Pointers
+
+某些函数的最后一个参数类型是任意类型的指针(void-pointer)
+    M...Inquire() and M...GetResult()
+数据类型取决于
+    1.函数中某一个参数的设置
+        MbufInquire(bufId, M_ALLOCATION_OVERSCAN_SIZE, %Value1) // value1 type is MIL_INT
+        MbufInquire(bufId, M_ANCESTOR_ID, &value2) // value2 type is MIL_ID
+    2.对函数参数集合的添加
+        MbufInquire(bufId, M_DRAW_RELATIVE_ORIGIN_X + M_TYPE_DOUBLE, &value4) // value4 type is MIL_INT
+        MbufInquire(bufId, MDRAW_RELATIVE_ORIGIN_X, &value3) // value3 type is MIL_DOUBLE
+
+
+                            Safe Types
+
+1.在MIL API中大多数Inquire函数最后一个参数类型为void*
+2.然后，MIL将函数的返回值放在这个指针（void*）指向的地址上，而不管返回值的类型如何
+3.错误的数据类型将导致报错
+    stack corruption
+    array overflow
+    unitialized returned data
+    segmentation faults
+Safe types
+1.帮助程序避免错误的指针数据类型转换
+2.在32-bit OS移植到64-bit OS时能自动转化对应的数据长度，不管是在ASCII or Unicode
+3.只在windows下可以使用
+
+In Debug Mode
+    编译期间默认启用安全数据类型
+In Release mode
+    编译期间默认关闭安全数据类型
+
+如果期望的数据类型和实际函数返回的数据类型不一致，会报警告错误
+警告错误不能向error一样被捕获
+
+略过类型检查的原因：
+1.数据类型在函数调用是无法预知，这种情况发生在一个函数包装在另一个函数中
+    MIL_INT UserWrapperAroundMbufInquire(MIL_ID bufId, MIL_INT INquireTYpe, void* useptr)
+    {
+        return MbufInquire(bufId, inquireType, usePtr);
+    }
