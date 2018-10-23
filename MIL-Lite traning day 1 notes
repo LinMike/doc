@@ -221,3 +221,283 @@ In Release mode
     {
         return MbufInquire(bufId, inquireType, usePtr);
     }
+2.传递给函数的值的数据类型不是函数所接受的预期的数据类型之一（例如， 在应用程序中定义了自定义的数据类型）
+    关闭安全类型检查
+    在#include "mil.h"之前添加#define M_MIL_USE_SAFE_TYPE = 0;
+
+                            Buffers
+
+主要内容包含
+1.缓冲区属性和类型
+2.维度，数据深度和数据类型
+3.操作数据缓冲区
+4.加载和保存图像
+5.将数据生成到LUTs中
+
+分配数据缓冲区时必须指定
+1.属性
+2.目标系统
+3.数据维度
+4.数据类型和深度
+
+分配不同类型的缓冲区
+
+MbufAlloc1d()   分配1维的数据缓冲区
+MbufAlloc2d()   2维度
+MbufAllocColor() 颜色数据类型
+
+return :buffer identifier, or M_NULL if allocation fails
+
+MbufAlloc1d(MIL_ID systemId,  //system identifier
+            MIL_INT sizex,    //x dimension
+            MIL_INT type,     //data depth and data type
+            MIL_INT64 attribute,//buffer attribute
+            MIL_ID *bufferPtr)  //storage location for buffer identifier
+
+sample: allocate buffer to be used for an 8-bit grayscale lookup table
+    MbufAlloc1d(MilSystem, 256, 8, M_LUT, &MilLutBuffer);
+
+MbufAlloc2d(SystemId,
+            sizex,      //x dimension
+            sizey,      //y dimension
+            type,
+            attribute,
+            bufferPtr)
+
+sample: allocate an 8-bit image buffer for grabbing and displaying
+    MbufAlloc2d(MilSystem, 100, 100, 8, M_IMAGE + M_GRAB + M_DISP, &MilBuffer);
+
+
+MbufAllocColor(SystemId,
+                sizeBand,       // number of color bands
+                sizex,
+                sizey,
+                type,
+                attribute,
+                bufIdPtr)
+
+sample: allocate a packed RGB displayable directX buffer in the video memory
+    MbufAllocColor(MilSystem, 3, 1024, 768, 8,
+                M_IMAGE+M_DIRECTX+M_RGB24+M_PACKED+M_VIDEO_MEMORY+M_DISP,
+                &MilDxBuffer);
+
+属性和缓冲区类型
+                 image data   : M_IMAGE
+MIL / MIL-Lite : lookup table : M_LUT
+                 array of data: M_ARRAY
+
+
+                 Convolution kernel : M_KERNEL          //卷积核
+MIL ONLY       :
+                 Structuring element: M_STRUCT_ELEMENT  //结构化元素
+
+MIL 缓冲区属性指定缓冲区类型及其预期用途，使用这些信息确定在物理内存中最合适的分配位置，以及如何处理缓冲区
+
+与M_IMAGE组合的多个属性说明
+    M_DISP      用于显示display
+    M_GRAB      存储采集的数据，grab data
+    M_PROC      可被处理的缓冲区
+    M_COMPRESS  可以容纳压缩数据的图像缓冲区
+
+在分配图像缓冲区(M_IMAGE)时必须提供更多信息，通过M_IMAGE与上述属性组合使用
+使用M_COMPRESS类型必须添加组合常数指定压缩数据格式（如：M_H264）
+
+for example, allocate an image buffer
+    M_IMAGE + M_GRAB + M_DISP + M_PROC
+
+必须给出buffer的属性才能做对应的操作，如M_DISP，buffer没有设置该属性使用MdispSelect()将会报错
+
+设置了M_GRAB属性的buffer分配在线性未分页的内存空间(linear non-paged memory)
+    grabbing 是一个实时的操作，因此需要不断的访问物理上连续的内存
+    未分页的内存是物理连续且总是存在的
+
+总线控制在设备不需要cpu的帮助的情况下写入非分页内存
+
+内存限制
+    M_GRAB缓冲区最大值受非分页内存限制
+    M_GRAB和M_PROC缓冲区的最大值受板载内存的限制
+
+如果非分页内存不足以分配一个grab buffer，MbufAlloc...()将报错
+必须使用MILConfig设置非分页内存数量，才能分配到非分页内存
+
+
+                            LUT data buffer
+
+LUT data buffer (M_LUT)
+
+LUTs 将数据映射到预先计算的替换值
+
+LUT index           LUT values
+0                   0
+1                   84
+2                   170
+3                   255
+
+原始8-bit图像存储的不是grayscale数据，而是LUT index，
+再通过LUT map的到result 8-bit图像实际的灰度值（LUT values）
+当不再需要LUT buffer是通过MbufFree()释放内存
+
+
+Dimensions
+
+buffer can have:
+    X  //width
+    Y  //height
+    number of color bands // RGB or gray ..., typically 1 or 3
+LUTs of dimensions Y = 1
+color buffers each band has the same data depth and type
+
+Data Depth
+数据深度表示缓冲区每个频带的数据比特数，（1-bit, 8-bit, 32-bit）
+
+如果一个图像的数据深度为1位，每个像素将被表示为1位，8个像素将被打包成一个字节
+注意，直接在已打包的二进制缓冲区上进行处理非常快速和高效。许多MIL函数在打包的二进制缓冲区上执行时支持加速处理。
+不支持直接打包二进制缓冲区的一般处理函数，自动将数据复制到合适数据类型的临时缓冲区，执行操作，并将结果缓冲区返回到打包二进制缓冲区。
+
+Data Type
+
+1-bit二进制数
+8,16,32-bit 整数（有符号或无符号）
+32-bit浮点数
+
+缓冲区的数据类型指示其数据如何在内部表示，即，有符号或无符号或浮点
+
+通常MIL函数能处理
+    任意数据类型和深度的缓冲区
+    不同数据类型和深度的源缓冲区和目标缓冲区
+如果某个函数只能操作指定类型的数据缓冲区，则会在函数描述中明确说明
+
+通常8位（1或3波段）缓冲区用于显示，因此任何其他缓冲区在现实之前都要转化为8-bit
+
+
+Choosing the right buffer
+
+当你需要整数的缓冲区，使用
+8-bit per pixel
+16-bit
+32-bit if you need
+    浮点型数据 (float)
+    额外的精度
+    更大的动态范围
+
+1-bit buffer处理更高效
+    点对点的逻辑操作， AND / OR / XOR
+    形态学操作
+    Blob operations
+
+
+
+操作和控制数据缓冲区
+
+
+操作和控制数据缓冲区的特定部分通过：
+    在其中创建一个child缓冲区
+    拷贝这部分到其他缓冲区
+
+child buffers 等同于region of interest(ROI)
+通常只能处理一个缓冲区，但是对于child buffer可以同时处理多个
+
+使用MbufChild()分配和关联child buffer独特的标识符
+任何指定的或返回的坐标都与子对象的左上角相关，即，相对坐标偏移量
+child buffer也能有自己的child buffers
+
+child buffer properties
+不能超出parent范围
+可以resize和moving using MbufChildMove()
+释放 using MbufFree()
+    child buffer 在parent 分配后分配，在parent释放前释放
+
+MbufChild1d() 1-dim region all bands
+MbufChild2d() 2-dim region all bands
+
+MbufChildColor()  1-band
+MbufChildColor2d() 1- or all-bands
+
+
+MIL functions description
+
+1-D child buffers
+
+MbufChild1d(parentBufId,        //parent buffer identifier
+            OffX,               //x pixel offset relative to parent buffer, 50
+            sizeX,              //child buffer width , 100
+            buffIdPtr)          //storage location for child buffer identifier
+
+return value : child buffer identifier or M_NULL
+
+2-D child buffers
+
+MbufChild2d(parentBufId,        //...
+            OffX,               //...
+            OffY,               //y pixel offset relative to parent
+            sizeX,
+            sizeY,
+            bufIdPtr)
+
+all region and all bands of parent buffer range
+MbufChildColor(parentBufId,
+                Band,           //index of the color band
+                BufIdPtr)
+
+sample: create a child buffer to edit only the green band of a parent buffer
+    MbufChildColor(parentBuffer, M_GREEN, &childBuffer)
+
+parent buffer 不能有 M_COMPRESS 属性
+
+
+MbufChildColor2d(parentBufId,
+                 Band,          //M_GREEN
+                 OffX,
+                 OffY,
+                 SizeX,
+                 SizeY,
+                 bufIdPtr)
+
+parent buffer cannot have an M_COMPRESS attribute,unless band parameter is set to M_ALL_BAND
+
+
+Copying specific buffer areas
+
+operate on
+    areas
+    bits
+
+if not the same type, MIL compensates(补偿)
+作为操作子缓冲区的替代方法，对buffer的特定区域或位拷贝到另一个buffer
+
+MIL buffer copy functions
+    MbufCopy()
+    MbufCopyColor()
+    MbufCopyColor2d()
+    MbufCopyClip()
+    MbufCopyCond()
+    MbufCopyMask()
+    MbufTransfer()
+
+
+如果源缓冲区深度大于目标深度，那么在将数据复制到目标时，最重要的位就会被截断。如果目标深度大于源深度，
+那么在复制到目标时，源数据为零或扩展了符号(取决于源的类型)。如果目标比源更大，则超过缓冲区的区域不受影响。
+
+当从浮点缓冲区复制到整数缓冲区时，值将被截断。当从非二进制缓冲区复制到二进制缓冲区，
+源缓冲区中的所有非零像素都表示为二进制缓冲区中的1(1)。当将二进制缓冲区复制到不同深度的缓冲区时，
+每个位都被复制到不同目标像素的最低有效位。目标像素的剩余位设为0;要将位值转到所有位，
+请使用mimbinalize () (MIL-Full)。
+
+如果源缓冲区是3波段YUV缓冲区，而目标缓冲区是1波段缓冲区，则只复制Y波段(亮度)。
+如果源缓冲区是3波段RGB缓冲区，而目标缓冲区是1波段缓冲区，则只复制红色波段。
+
+
+
+
+                                缓冲区压缩和颜色空间转换
+
+when copying from following type , MIL automatically converts
+
+    RGB to/from YUV
+    M_COMPRESS to/from uncompressed     //如果源缓冲区有M_COMPRESS说明符，而目标缓冲区没有，则数据将自动解压缩。
+    uncompressed to/from M_COMPRESS     //如果目标缓冲区有M_COMPRESS说明符，而源缓冲区没有，数据将被自动压缩。
+    M_COMPRESS to/from M_COMPRESS (diff type) //如果两个缓冲区都有M_COMPRESS说明符，但是不同的压缩类型，数据将根据目标缓冲区中的设置重新压缩
+
+
+
+
