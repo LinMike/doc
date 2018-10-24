@@ -499,5 +499,237 @@ when copying from following type , MIL automatically converts
     M_COMPRESS to/from M_COMPRESS (diff type) //如果两个缓冲区都有M_COMPRESS说明符，但是不同的压缩类型，数据将根据目标缓冲区中的设置重新压缩
 
 
+MbufCopyColor() or MbufCopyColor2d()
+    从彩色图像中检索或替换颜色组件
+    将指定源缓冲区的一个或所有颜色带复制到指定的目标缓冲区
+    可以与单个缓冲区带一起使用(比使用子缓冲区更高效)
+    MbufCopyColor2d()允许您选择一个或所有颜色波段的区域
+    •在分配或创建缓冲区时，函数的2d版本(例如MbufAlloc2d())的灵活性较差(对比MbufAllocColor())，
+     在这种情况下，MbufCopyColor2d()比MbufCopyColor()更灵活
+
+显示color buffer其中一个band
+    分配一个二维显示图像的缓冲区,M_DISP
+    使用MbufCopyColor()拷贝需要的band到buffer（或设置child buffer of required band to display）
+
+sample : copy src buffer red band to dest buffer blue band
+    MbufCopyColor2d(srcBuff, destBuf, M_RED, 0, 0, M_BLUE, 0, 0, sizeX, sizeY);
+
+
+MbufCopyClip()
+    拷贝buffer到目标buffer，如果添加offX和offY导致dest buffer超出src buffer范围，则超出部分不拷贝
+
+
+MbufCopyCond()
+    将src buffer拷贝到dest buffer，只拷贝满足condition的区域到dest buffer
+    MbufCopyCond(srcBuffer,
+                 destBuffer,
+                 CondBuffer,
+                 M_EQUAL,       // MIL_INT64 condition
+                 M_COLOR_WHITE) // MIL_DOUBLE condition Value
+
+MIL_INT64 condition :
+    M_EQUAL      pixels == cond value
+    M_NOT_EQUAL  pixels != cond value
+    M_DEFAULT    pixels != 0, condition value is ignored
+
+虽然condValue的类型是double，但是把它认为是与confition buffer的数据类型和深度一致
+如果confition buffer只有一个band而dest buffer有多个band，那么condition将应用于dest的每一个band
+
+MbufTransfer(srcbuf, destbuf,
+             srcOffX, srcOffY, srcSizeX, srcSizeY, srcBand,
+             destOffX, destOffY, destSizeX, destSizeY, destBand,
+             transferFunctino,      //M_COPY, M_CLEAR, M_COMPOSITION, M_BYTE_SWAP
+             TransferType,          //M_DIRECTX_MODE + M_SYNCHRONOUS
+             OperationFlag,         //M_NULL
+             ExtraParameter)        //M_NULL
+
+transferFunction
+    M_COPY          //copy data to dest buffer, data type convert automatically
+    M_CLEAR         //clear dest data
+    M_COMPOSITION   //copy data except src region equal specified by operationFlag
+    M_BYTE_SWAP     //swap src and dest, only for 1-band 16-bit or 1-band 32-bit
+
+M_BYTE_SWAP must have the same internal storage specifiers
+
+TransferType
+    M_DEFAULT       //most efficient transfer mode
+    M_MIL_MODE      //always possible, standard MIL mode
+    M_DIRECTX_MODE  //can not be used if transferFunction is set to M_SWAP
+    M_DIB_MODE      //use DIB interface, only possible when tras func set to M_COPY
+
+M_DIRECTX_MODE
+    need both src and dest have the M_DIRECTX attribute
+    transfer type set M_SYNCHRONOUS or M_ASYNCHRONOUS to set transfer synchronously or not
+M_DIB
+    both src and dest have the M_DIB attribute
+
+
+
+加载和保存图片
+
+Loading image
+    自动分配缓冲区
+        MbufImport() with M_RESTORE
+        MbufRestore()
+
+    加载到已经分配过的缓冲区
+    MbufImport() with M_LOAD
+    MbufLoad()
+
+在文件中检索缓冲区数据
+    MbufDiskInquire(fileName,
+                    inquireType,
+                    userVarPtr)
+
+Inquire type :
+    M_SIZE_X, M_SIZE_X+M_LUT, M_FILE_FORMAT, M_RESOLUTION_X, M_ASPECT_RATIO,
+    M_NUMBER_OF_IMAGES, M_FRAME_RATE, M_COMPRESSION_TYPE, M_ATTRIBUTE, M_TYPE ......
+
+return value :
+    the setting for the request information (MIL_INT), or M_INVALID
+sample :
+    MbufDiskInquire(MIL_TEXT("file/folder.tif", M_SIZE_X, &ImageSizeX);
+
+MbufImport(fileName,    //MIL_CONST_TEXT_PTR
+           fileFormat,  //MIL_INT64
+           operation,   //MIL_INT64
+           systemId,    //MIL_ID
+           bufferIdPtr) //MIL_ID*
+
+sample : import an image into an automatically allocated buffer
+    MbufImport(MIL_TEXT("file.tif"),
+               M_TIFF,
+               M_RESTORE,  //M_LOAD into a exist buffer
+               MilSystem,
+               &NewImageBuffer);
+
+return value : the buffer identifier for an M_RESTORE operation
+需要指定文件格式，而MbufLoad()和MbufRestore()读取文件来确定格式，
+但是会消耗更多时间相比MbufImport(),但参数后者更多。
+
+file format
+    M_DEFAULT   //file format
+    M_BMP,
+    M_JPEG...
+    M_RAW,
+    M_TIFF,
+    M_PNG,
+    M_MIL
+
+//restore data from a file into an automatically allocated data buffer
+// which can be use for M_GRAB, M_DISP, M_PROC
+//if cannot allocate an image buffer generates an error
+//MbufLoad load into a pre-allocated buffer
+MbufRestore(fileName,
+            SystemId,
+            bufIdPtr);
+
+MbufInquire() to obtain the associated LUT
+
+
+MbufLoad(fileName, bufId)
+
+sample:
+    MbufDiskInquire(MIL_TEXT("file.min"), M_SIZE_X, sizex);
+    ..sizeY
+    ..band
+    MbufAllocColor(milSystem, band, sizex, sizey, 8, M_IMAGE, &imageBuf);
+    MbufLoad(MIL_TEXT("file.min"), imageBuf);
+
+
+Save image
+
+    MbufExport(MIL_TEXT("file.min"), M_TIFF, imageBuf);   //any supported format
+    MbufSave(MIL_TEXT("file.min"), imageBuf);     //M_MIL format, (.mim)
+
+
+Images sequences
+    MbufImportSequence()
+    MbufExportSequence()
+
+file format
+    M_AVI_MJPG
+    M_AVI_DIB
+    M_AVI_MIL
+    M_DEFAULT
+
+
+Generating Data into LUTs
+    MgenLutRamp()       //generate ramp data into a LUT buffer
+    MgenLutFunction()   //
+    MgenWarpParameter()
+
+
+MIL Graphics
+    MgraBackColor()
+    MgraColor()
+    MgraFont()
+    MgraFontScale()
+
+
+                                    Display
+
+MdispAlloc(systemId, dispNum, dispFormat, initFlag, displayIdPtr);
+
+//allocate a windowed display
+MdispAlloc(milSystemId, M_DEFAULT, "M_DEFAULT", M_WINDOWED, &milDisplay);
+1.the display buffer must have M_DISP attribute
+2.must allocate a display with MdispAlloc()
+
+use MdispSelect() to select iamge buffer to display
+a buffer or it's child buffer can be selected on more than one display
+
+//select an image buffer to a specified display
+MdispSelect(displayId,      //MIL_ID display identifier
+            imageBufId)     //MIL_ID image buffer identifier
+
+sample:
+    MdispAlloc(MilSystem, M_DEFAULT, "M_DEFAULT", M_WINDOWED, &MilDisplay);
+    MdispAloocColor(milSystem, 3, 640, 480, 8, M_IMAGE + M_DISP, &imageBuf);
+    MdispSelect(MilDisplay, imageBuf);
+
+MdispSelect() with ImageBufId set to M_NULL to stop displaying the specified image buffer
+once you have finished using a display, you should free it, using MdispFree();
+
+
+    MbufFree(imageBuf);
+    MdispFree(MilDisplay);
+
+
+Displaying images
+    type of displays
+        M_WINDOWED    //with windowed border
+        M_EXCLUSIVE   //without windowed border
+
+
+display in a user-defined window with
+    MdispSelectWindow()
+        指定用户自定义窗口的handle参数，ClientWindowHandle
+        当buffer或者display被修改时刷新窗口
+
+displaying multiple buffers
+    view one buffer at a time in one display
+    use child buffers to view multiple buffers on one display
+        multi-child buffers within parent buffer
+        display parent buffer
+        each child buffer display defferent image
+
+MbufAllocColor(milSystem, 3, 1024, 768, )
+
+
+
+
+display non 8-bit buffers
+    control how buffers are displayed using MdisControl() with M_VIEW_MODE
+
+M_VIEW_MODE
+    M_BIT_SHIFT         //截取高8-bit显示
+    M_AUTO_SCALE        //压缩到0～255的8-bit数据范围
+    M_MULTI_BYTES       //16-bit的低8-bit作为pixel 0, 高8-bit作为pixel 1
+    M_TRANSPARENT       //截取低8-bit显示，默认方式
+    M_DEFAULT   //same as transparent,
+
+Additional display options
+
 
 
