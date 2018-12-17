@@ -1,0 +1,29 @@
+/*
+ * gradient_hough.h
+ *
+ *  Created on: 2018-12-3
+ *      Author: robot
+ */
+
+#ifndef SRC_GRADIENT_HOUGH_H_
+#define SRC_GRADIENT_HOUGH_H_
+
+#include <vector>
+#include <opencv2/core.hpp>
+
+class Gradient_Hough {
+public:
+	Gradient_Hough(cv::Mat src, std::vector<cv::KeyPoint> balls);
+	~Gradient_Hough();
+
+	void gradHough(int grad_x, int grad_y, double radius);
+	void CircleTemplate(double radius);
+	void showSobelDir(const cv::Mat& img, cv::Mat& grad_imgx_, cv::Mat& grad_imgy_);
+private:
+	cv::Mat src;
+
+};
+
+
+
+#endif /* SRC_GRADIENT_HOUGH_H_ */

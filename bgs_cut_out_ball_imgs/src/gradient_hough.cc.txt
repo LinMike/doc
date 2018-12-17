@@ -1,0 +1,95 @@
+/*
+ * gradient_hough.cc
+ *
+ *  Created on: 2018-12-3
+ *      Author: robot
+ */
+#include <gradient_hough.h>
+
+Gradient_Hough::Gradient_Hough(cv::Mat src, std::vector<cv::KeyPoint> balls) {
+	for(size_t i=0;i<balls.size();i++) {
+		int radius = balls.at(i).size;
+		int x = balls.at(i).pt.x-2*radius, y = balls.at(i).pt.y-2*radius;
+		int width = 4*radius, height = 4*radius;
+		cv::Mat gray;
+		cv::cvtColor(src, gray, CV_BGR2GRAY);
+		cv::Mat img = gray(cv::Rect(x,y,width,height));
+
+		cv::Mat resized_src, edge, resized_edge, normalized_img, filtered_img;
+		cv::resize(img, resized_src,cv::Size2i(0,0), 2, 2, cv::INTER_CUBIC);
+		cv::Canny(src, edge, 50, 100, 3);
+		cv::Canny(resized_src, resized_edge, 20, 40, 30);
+		cv::normalize(resized_src, normalized_img, 0, 255, cv::NORM_MINMAX);
+		cv::Mat kernel = (cv::Mat_<int>(3,3) << -1,-1,-1,-1,9,-1,-1,-1,-1);
+		cv::filter2D(resized_src, filtered_img, CV_8U, kernel);
+
+	}
+}
+
+Gradient_Hough::~Gradient_Hough() {
+
+}
+
+void Gradient_Hough::showSobelDir(const cv::Mat& img, cv::Mat& grad_imgx_, cv::Mat& grad_imgy_) {
+	int height = img.rows;
+	int width = img.cols;
+	cv::Mat sobel_x, sobel_y;
+	cv::Sobel(img, sobel_x, CV_64F, 1, 0, 3);
+	cv::Sobel(img, sobel_y, CV_64F, 0, 1, 3);
+	cv::Mat grad_imgx = cv::Mat::zeros(height, width, CV_64F);
+	cv::Mat grad_imgy = cv::Mat::zeros(height, width, CV_64F);
+
+	int factor = 10;
+	cv::Mat resized_arrow;
+	cv::resize(img, resized_arrow, cv::Size2i(0,0), factor, factor, cv::INTER_NEAREST);
+	int ll = factor * 0.9;
+
+	cv::Mat img2 = img * img;
+	cv::Mat kernel = (cv::Mat_<double>(3,3) << 1,2,1,2,4,2,1,2,1);
+	cv::Mat ex1,ex2;
+	cv::filter2D(img, ex2, CV_64F, kernel);
+	ex2 = ex2 * ex2;
+	cv::filter2D(img2, ex1, CV_64F, kernel);
+	ex1 = 16 * ex1;
+
+	cv::Mat sqrted_ex;
+	cv::sqrt(ex1 - ex2 + 1, sqrted_ex);
+	cv::Mat denom = sqrted_ex / sqrt(2);
+	std::cout<<"denom = "<<denom<<std::endl;
+
+	for (int row=0;row<height;row++)
+	{
+		for(int col=0;col<width;col++)
+		{
+			double dx = sobel_x.at<double>(row, col);
+			double dy = sobel_y.at<double>(row, col);
+			if (dx != 0 || dy != 0)
+			{
+				double cx = col * factor + factor / 2;
+				double cy = row * factor + factor / 2;
+				double angle = atan2(dy, dx);
+				int ex1 = (cx + ll*cos(angle)/2 + 0.5);
+				int ey1 = (cy + ll*sin(angle)/2 + 0.5);
+				int ex2 = (cx - ll*cos(angle)/2 + 0.5);
+				int ey2 = (cy - ll*sin(angle)/2 + 0.5);
+
+				cv::line(resized_arrow, cv::Point2f(cx, cy), cv::Point2i(ex1,ey1), cv::Scalar(255,255,255), 1);
+				cv::line(resized_arrow, cv::Point2f(cx, cy), cv::Point2i(ex2,ey2), cv::Scalar(150,150,150), 1);
+
+				grad_imgx.at<double>(row, col) = dx/denom.at<double>(row, col);
+				grad_imgy.at<double>(row, col) = dy/denom.at<double>(row, col);
+			}
+		}
+	}
+	cv::imshow("arrow", resized_arrow);
+	grad_imgx.copyTo(grad_imgx_);
+	grad_imgy.copyTo(grad_imgy_);
+}
+
+void Gradient_Hough::gradHough(int grad_x, int grad_y, radius) {
+
+}
+
+
+
+

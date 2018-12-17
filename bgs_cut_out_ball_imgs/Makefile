@@ -11,7 +11,7 @@ Linux_x86_64_INCLUDE = `pkg-config --cflags opencv`
 Linux_x86_64_LDFLAGS = `pkg-config --libs opencv` -lboost_filesystem -lboost_system -lboost_thread
 
 CC = g++
-CPPFLAGS = -O3 -g0 -Wall -std=c++11
+CPPFLAGS = -O3 -g0 -Wall
 
 INCLUDE = $($(PLATFORM)_$(MATHINE)_INCLUDE)
 LDFLAGS = $($(PLATFORM)_$(MATHINE)_LDFLAGS)
