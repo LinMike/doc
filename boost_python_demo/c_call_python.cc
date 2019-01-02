@@ -39,20 +39,52 @@ int main(void)
 	PyRun_SimpleString("sys.path.append('./')");
 	py::object mainMoudule;
 	py::object mainNamespace;
+	py::object drawDataMoudule;
 
 	try
 	{
 		cout<<"prepared to call python function"<<endl;
-		mainMoudule = py::import("__main__");
-		mainNamespace = mainMoudule.attr("__dict__");
-		py::object simple = exec_file("py_demo.py", mainMoudule, mainNamespace);
+//		mainMoudule = py::import("__main__");
+//		mainNamespace = mainMoudule.attr("__dict__");
+
+		drawDataMoudule = py::import("__main__");
+		py::object global(drawDataMoudule.attr("__dict__"));
+
+		py::object simple = py::exec_file("py_demo.py", global, global);
+		py::object drawData = global["drawData"];
+		py::object add = global["Add"];
+		py::object showimg = global["showimg"];
+
+		py::list la, lb, lc, ld;
+		la.append(1);
+		la.append(2.5);
+		la.append(3);
+		la.append(4.3);
+		la.append(5);
+		la.append(6);
+
+		lb.append(la);
+		lb.append(la);
+		lc.append(la);
+		lc.append(la);
+		ld.append(la);
+		ld.append(la);
+
+
+		drawData(lb, lc, ld);
+		cout<<"add result is = "<<py::extract<int>(add(1, 2))<<endl;
+		showimg(py::str("test.jpg"));
+
+
+
+//		py::object simple = py::exec_file("subplot_multy.py", mainMoudule, mainNamespace);
 //		py::object helloworld = mainNamespace["Hello"];
 //		helloworld("aaa");
 //		py::object showimg = mainNamespace["__main__"];
 //		showimg();
 
 //		py::object add = mainNamespace["Add"];
-//		cout<<"get function add = "<<&add<<endl;
+////		cout<<"get function add = "<<&add<<endl;
 //		int val = py::extract<int>(add(2,4));
 //		cout<<"call Add return = "<<val<<endl;
 //
@@ -83,7 +115,9 @@ int main(void)
 ////		lc.push_back(va);
 //
 //		py::object show = mainNamespace["drawData"];
-//
+//		cout<<"show function = "<<&show<<endl;
+//		show();
+//		system("puase");
 ////		py::list la, lb, lc;
 ////		la.append(vector2pylist(va));
 ////		la.append(vector2pylist(vb));
@@ -109,3 +143,4 @@ int main(void)
 
 	return 0;
 }
+

@@ -1,5 +1,5 @@
-import matplotlib.pyplot as plt
-import numpy as np
+# import matplotlib.pyplot as plt
+# import numpy as np
 
 #plt.figure(figsize=(6,6), dpi=180)
 plt.figure(1)
@@ -20,3 +20,4 @@ ax1.set_title('figure 1')
 ax2.set_title('figure 2')
 plt.tight_layout()
 plt.show()
+
